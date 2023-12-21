@@ -15,7 +15,7 @@ class ConfigureTelegramWebhoook extends Command
      *
      * @var string
      */
-    protected $signature = 'notifications:set-telegram-webhoook';
+    protected $signature = 'telegram:set-webhoook';
 
     /**
      * The console command description.

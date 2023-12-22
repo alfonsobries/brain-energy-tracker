@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('logs', function (Blueprint $table) {
             $table->id();
-            $table->string('feeling');
+            $table->string('mood');
             $table->json('symptoms');
             $table->timestamps();
         });

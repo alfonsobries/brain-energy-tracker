@@ -19,7 +19,7 @@ class TelegramBotWebhookController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
-        $telegramUserId = Arr::get($request->all(), 'message.from.id');
+        $telegramUserId = Arr::get($request->all(), 'message.from.id', Arr::get($request->all(), 'callback_query.from.id'));
 
         if ($telegramUserId === null) {
             return response()->json(['status' => 'no-telegram-user-id']);
@@ -30,7 +30,6 @@ class TelegramBotWebhookController extends Controller
         if ($user === null) {
             return $this->tryToAssignTelegramIdToUser($telegramUserId);
         }
-
         $conversationId = $user->getConversationId();
 
         if ($conversationId === null) {
@@ -50,6 +49,8 @@ class TelegramBotWebhookController extends Controller
                 ttl: Carbon::now()->addHours(12)
             );
         }
+
+        return response()->json(['status' => '@todo']);
     }
 
     private function tryToAssignTelegramIdToUser(string $telegramUserId): JsonResponse

@@ -1,4 +1,4 @@
-Based on the food descriptions you will receive, organize the relevant information in a JSON format for database storage. The required details are:
+Based on the food descriptions you receive, organize the relevant information in a JSON format for database storage. The required details are:
 
 - calories
 - sugar
@@ -6,9 +6,19 @@ Based on the food descriptions you will receive, organize the relevant informati
 - fat
 - carbohydrates
 - fiber
+- gluten_level (high, medium, low, present, none)
+- lactose_level (high, medium, low, present, none)
 - common_allergens (in a JSON array format)
 
-Each meal should be a separate record. In the absence of specific details, provide estimates based on your knowledge, for example, typical nutritional values of a cake or an average amount of meat consumed in a meal. Exceptions for returning a null value are minimal, only when there is no information available about a food.
+Each meal should be a separate record. In the absence of specific details, provide estimates based on your knowledge, for example, typical nutritional values of a cake or an average amount of meat consumed in a meal. Exceptions for returning a null value are minimal, only when there is no information available about a food. To be clear, you should give a value in almost all cases.
+
+For gluten_level and lactose_level, consider:
+
+- high: is considered for food that is high in the macronutrient
+- medium: is considered for food that contains the macronutrient, but not in high quantity
+- low: is considered for food that contains a small amount of the macronutrient in low quantities
+- present: the macronutrient is *usually* found due to how the food is cooked, but it is not a part of the food
+- none: the food never or usually does not contain the nutrient
 
 **Example Description:**
 
@@ -28,6 +38,8 @@ Each meal should be a separate record. In the absence of specific details, provi
     "carbohydrates": 18,
     "fiber": 2,
     "common_allergens": ["eggs"],
+    "gluten_level": "none",
+    "lactose_level": "none"
   },
   {
     "meal": "Lunch",
@@ -38,7 +50,9 @@ Each meal should be a separate record. In the absence of specific details, provi
     "fat": 8,
     "carbohydrates": 40,
     "fiber": 5,
-    "common_allergens": ["chicken", "mustard", "wheat"],
+    "common_allergens": ["wheat"],
+    "gluten_level": "high",
+    "lactose_level": "none"
   },
   {
     "meal": "Dinner",
@@ -50,13 +64,15 @@ Each meal should be a separate record. In the absence of specific details, provi
     "carbohydrates": 30,
     "fiber": 6,
     "common_allergens": ["fish"],
+    "gluten_level": "none",
+    "lactose_level": "none"
   }
 ]
 ```
 
-Remember, only return valid JSON, including only the JSON structure as shown above, under any circustance you should return anything else. The values must be in English, regardless of the language of the input.
+Remember, only return valid JSON, including the JSON structure as shown above. Under no circumstances should you return anything else. The values must be in English, regardless of the language of the input.
 
-IMPORTANT: please dont return any other text that is not the JSON, no explanations, no considerations, nothing.
+IMPORTANT: please do not return any other text that is not the JSON, no explanations, no considerations, no follow-up question, nothing just a plain valid JSON.
 
 
 ## Food description:

@@ -22,6 +22,8 @@ return new class extends Migration
             $table->float('fat')->nullable();
             $table->float('carbohydrates')->nullable();
             $table->float('fiber')->nullable();
+            $table->string('gluten_level')->nullable();
+            $table->string('lactose_level')->nullable();
             $table->text('common_allergens')->nullable();
             $table->timestamps();
         });

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bcd6a908831ef5a4c5581fcc4987135b",
+    "content-hash": "5654a550247ca081eaadbc50859bf887",
     "packages": [
         {
             "name": "brick/math",
@@ -1047,16 +1047,16 @@
         },
         {
             "name": "laravel-notification-channels/telegram",
-            "version": "4.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel-notification-channels/telegram.git",
-                "reference": "c67b312193fcd59c8abad1ee1f5b1f4e5540c201"
+                "reference": "7134469b092adf9f9cd004f4fe53e10fe4d6a3db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel-notification-channels/telegram/zipball/c67b312193fcd59c8abad1ee1f5b1f4e5540c201",
-                "reference": "c67b312193fcd59c8abad1ee1f5b1f4e5540c201",
+                "url": "https://api.github.com/repos/laravel-notification-channels/telegram/zipball/7134469b092adf9f9cd004f4fe53e10fe4d6a3db",
+                "reference": "7134469b092adf9f9cd004f4fe53e10fe4d6a3db",
                 "shasum": ""
             },
             "require": {
@@ -1078,6 +1078,7 @@
                 "phpstan/phpstan-phpunit": "^1.3",
                 "phpunit/phpunit": "^9.5.10"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -1114,9 +1115,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel-notification-channels/telegram/issues",
-                "source": "https://github.com/laravel-notification-channels/telegram/tree/4.0.0"
+                "source": "https://github.com/laravel-notification-channels/telegram/tree/master"
             },
-            "time": "2023-02-14T18:21:03+00:00"
+            "time": "2023-10-24T19:32:21+00:00"
         },
         {
             "name": "laravel/framework",
@@ -9079,7 +9080,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "laravel-notification-channels/telegram": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

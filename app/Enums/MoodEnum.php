@@ -58,4 +58,15 @@ enum MoodEnum: string
             self::TIRED,
         ];
     }
+
+    public static function fromString(string $value): ?self
+    {
+        foreach (self::cases() as $case) {
+            if ($case->value === $value) {
+                return $case;
+            }
+        }
+
+        return null;
+    }
 }

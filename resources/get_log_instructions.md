@@ -23,6 +23,4 @@ AGAIN: just a valid JSON output.
 
 ## Description:
 
-Me senti todo el día decaido, tuve dolor de cabeza como presion en el craneo y me estuve enojando muy facilmente.
-
 %s

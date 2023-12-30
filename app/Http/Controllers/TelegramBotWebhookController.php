@@ -30,6 +30,7 @@ class TelegramBotWebhookController extends Controller
         if ($user === null) {
             return $this->tryToAssignTelegramIdToUser($telegramUserId);
         }
+
         $conversationId = $user->getConversationId();
 
         if ($conversationId === null) {
@@ -37,20 +38,36 @@ class TelegramBotWebhookController extends Controller
         }
 
         if ($this->isMoodAnswer($request)) {
-            $mood = MoodEnum::fromString(Arr::get($request->all(), 'callback_query.data'));
-
-            if ($mood === null) {
-                return response()->json(['status' => 'invalid-mood']);
-            }
-
-            Cache::put(
-                key: sprintf('mood-%s', $conversationId),
-                value: $mood->value,
-                ttl: Carbon::now()->addHours(12)
-            );
+            return $this->storeMood($request, $conversationId);
         }
 
         return response()->json(['status' => '@todo']);
+    }
+
+    private function storeMood(Request $request, string $conversationId): JsonResponse
+    {
+        $mood = MoodEnum::fromString(Arr::get($request->all(), 'callback_query.data'));
+
+        if ($mood === null) {
+            return response()->json(['status' => 'invalid-mood']);
+        }
+
+        $prevMods = Cache::get(sprintf('mood-%s', $conversationId));
+
+        if ($prevMods) {
+            $mods = json_decode($prevMods, true);
+            $mods[] = $mood->value;
+        } else {
+            $mods = [$mood->value];
+        }
+
+        Cache::put(
+            key: sprintf('mood-%s', $conversationId),
+            value: json_encode(array_unique($mods)),
+            ttl: Carbon::now()->addHours(12)
+        );
+
+        return response()->json(['status' => 'mood-stored']);
     }
 
     private function tryToAssignTelegramIdToUser(string $telegramUserId): JsonResponse

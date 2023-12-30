@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('logs', function (Blueprint $table) {
             $table->id();
-            $table->string('mood');
+            $table->json('mood');
+            $table->json('sleep_quality');
+            $table->json('wake_up_state');
             $table->json('symptoms');
             $table->timestamps();
         });

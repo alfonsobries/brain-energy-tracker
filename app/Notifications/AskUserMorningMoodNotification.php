@@ -17,7 +17,7 @@ class AskUserMoodNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    const QUESTION = 'How did you wake up this morning?';
+    const QUESTION = '"How did you feel today?';
 
     /**
      * Get the notification's delivery channels.

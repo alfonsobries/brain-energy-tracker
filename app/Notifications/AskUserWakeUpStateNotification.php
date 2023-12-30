@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Enums\MoodEnum;
+use App\Enums\WakeUpStateEnum;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Telegram\TelegramBase;
 use NotificationChannels\Telegram\TelegramMessage;
-use NotificationChannels\Telegram\TelegramPoll;
 
-class AskUserMoodNotification extends Notification implements ShouldQueue
+class AskUserWakeUpStateNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    const QUESTION = '"How did you feel today?';
+    const QUESTION = 'How did you wake up this morning?';
 
     /**
      * Get the notification's delivery channels.
@@ -31,27 +30,14 @@ class AskUserMoodNotification extends Notification implements ShouldQueue
 
     public function toTelegram(User $notifiable): TelegramBase
     {
-
         $message = TelegramMessage::create()
             ->to($notifiable->telegram_user_id)
             ->line(self::QUESTION);
 
-        foreach (MoodEnum::values() as $mood) {
+        foreach (WakeUpStateEnum::values() as $mood) {
             $message->buttonWithCallback(sprintf('%s %s', $mood->emoji(), $mood->description()), $mood->value);
         }
 
         return $message;
-
-        // $choices = collect(MoodEnum::values())->map(
-        //     fn (MoodEnum $mood) => sprintf('%s %s', $mood->emoji(), $mood->description())
-        // )->toArray();
-
-        // return TelegramPoll::create()
-        //     ->to($notifiable->telegram_user_id)
-        //     ->question(self::QUESTION)
-        //     ->options([
-        //         'allows_multiple_answers' => true,
-        //     ])
-        //     ->choices($choices);
     }
 }

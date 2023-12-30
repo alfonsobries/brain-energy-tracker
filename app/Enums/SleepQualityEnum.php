@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
+use App\Enums\Traits\FromStringTrait;
+
 enum SleepQualityEnum: string
 {
+    use FromStringTrait;
+
     case WELL = 'well';
     case POORLY = 'poorly';
     case RESTLESSLY = 'restlessly';

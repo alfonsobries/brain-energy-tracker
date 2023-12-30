@@ -2,8 +2,12 @@
 
 namespace App\Enums;
 
+use App\Enums\Traits\FromStringTrait;
+
 enum MoodEnum: string
 {
+    use FromStringTrait;
+
     case HAPPY = 'happy';
     case SAD = 'sad';
     case EUPHORIC = 'euphoric';
@@ -57,16 +61,5 @@ enum MoodEnum: string
             self::MOTIVATED,
             self::TIRED,
         ];
-    }
-
-    public static function fromString(string $value): ?self
-    {
-        foreach (self::cases() as $case) {
-            if ($case->value === $value) {
-                return $case;
-            }
-        }
-
-        return null;
     }
 }

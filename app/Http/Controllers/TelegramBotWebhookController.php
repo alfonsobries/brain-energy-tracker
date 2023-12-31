@@ -86,7 +86,7 @@ class TelegramBotWebhookController extends Controller
             $question = $question->nextQuestion();
 
             if ($question !== null && $question->notAskedYet($conversationId)) {
-                $user->notifyNow($question);
+                $user->ask($question);
 
                 return response()->json(['status' => 'next-question']);
             }

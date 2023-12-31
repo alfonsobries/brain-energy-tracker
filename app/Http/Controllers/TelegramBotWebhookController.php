@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\MoodEnum;
-use App\Enums\SleepQualityEnum;
-use App\Enums\WakeUpStateEnum;
+use App\Enums\QuestionsEnum;
 use App\Models\User;
 use App\Notifications\AskUserMoodNotification;
 use App\Notifications\AskUserSleepQualityNotification;
 use App\Notifications\AskUserWakeUpStateNotification;
 use App\Notifications\TelegramReadyNotification;
-use Carbon\Carbon;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,21 +19,39 @@ use Illuminate\Support\Facades\Log;
 
 class TelegramBotWebhookController extends Controller
 {
-    const SLEEP_QUALITY = 'sleep-quality';
+    // const SLEEP_QUALITY = 'sleep-quality';
 
-    const WAKE_UP_STATE = 'wake-up-state';
+    // const WAKE_UP_STATE = 'wake-up-state';
 
-    const MOOD = 'mood';
+    // const MOOD = 'mood';
+
+    // const QUESTIONS = [
+    //     self::MOOD => AskUserMoodNotification::class,
+    //     self::WAKE_UP_STATE => AskUserWakeUpStateNotification::class,
+    //     self::SLEEP_QUALITY => AskUserSleepQualityNotification::class,
+    // ];
+
+    private function getUser(string|int $telegramUserId): ?User
+    {
+        return User::where('telegram_user_id', $telegramUserId)->first();
+    }
+
+    private function getTelegramUserId(Request $request): string|int|null
+    {
+        return Arr::get($request->all(), 'message.from.id', Arr::get($request->all(), 'callback_query.from.id'));
+    }
 
     public function __invoke(Request $request): JsonResponse
     {
-        $telegramUserId = Arr::get($request->all(), 'message.from.id', Arr::get($request->all(), 'callback_query.from.id'));
+        $telegramUserId = $this->getTelegramUserId($request);
 
         if ($telegramUserId === null) {
+            Log::info('No telegram user ID');
+
             return response()->json(['status' => 'no-telegram-user-id']);
         }
 
-        $user = User::where('telegram_user_id', $telegramUserId)->first();
+        $user = $this->getUser($telegramUserId);
 
         if ($user === null) {
             Log::info('User not found', ['telegram_user_id' => $telegramUserId]);
@@ -52,55 +67,36 @@ class TelegramBotWebhookController extends Controller
             return response()->json(['status' => 'no-conversation-id']);
         }
 
-        if ($this->isMoodAnswer($request)) {
-            $response = $this->storeConversationValue(self::MOOD, MoodEnum::class, $request, $user, $conversationId);
+        $messageText = Arr::get($request->all(), 'callback_query.message.text', '');
 
-            if ($this->haventAsked(self::WAKE_UP_STATE, $conversationId)) {
-                $user->notifyNow(new AskUserWakeUpStateNotification());
+        $question = QuestionsEnum::fromQuestion($messageText);
+
+        if ($question === null) {
+            Log::info('No question found', ['telegram_user_id' => $telegramUserId, 'message_text' => $messageText]);
+
+            return response()->json(['status' => 'no-question']);
+        }
+
+        try {
+            $question->storeAnswerInCache(
+                conversationId: $conversationId,
+                answerText: Arr::get($request->all(), 'callback_query.data', '')
+            );
+
+            $question = $question->nextQuestion();
+
+            if ($question !== null) {
+                $user->notifyNow($question);
+
+                return response()->json(['status' => 'next-question']);
             }
+        } catch (\Exception $e) {
+            Log::info('Invalid answer', ['telegram_user_id' => $telegramUserId, 'message_text' => $messageText]);
 
-            return $response;
-        } elseif ($this->isWakeUpStateAnswer($request)) {
-            $response = $this->storeConversationValue(self::WAKE_UP_STATE, WakeUpStateEnum::class, $request, $user, $conversationId);
-
-            if ($this->haventAsked(self::SLEEP_QUALITY, $conversationId)) {
-                $user->notifyNow(new AskUserSleepQualityNotification());
-            }
-
-            return $response;
-        } elseif ($this->isSleepQualityAnswer($request)) {
-            $this->storeConversationValue(self::SLEEP_QUALITY, SleepQualityEnum::class, $request, $user, $conversationId);
+            return response()->json(['status' => 'invalid-answer']);
         }
 
         return response()->json(['status' => '@todo']);
-    }
-
-    private function storeConversationValue(string $key, string $enum, Request $request, User $user, string $conversationId): JsonResponse
-    {
-        $cacheKey = sprintf('%s-%s', $key, $conversationId);
-
-        $mood = $enum::fromString(Arr::get($request->all(), 'callback_query.data'));
-
-        if ($mood === null) {
-            return response()->json(['status' => 'invalid-mood']);
-        }
-
-        $prevMods = Cache::get($cacheKey);
-
-        if ($prevMods) {
-            $mods = json_decode($prevMods, true);
-            $mods[] = $mood->value;
-        } else {
-            $mods = [$mood->value];
-        }
-
-        Cache::put(
-            key: $cacheKey,
-            value: json_encode(array_unique($mods)),
-            ttl: Carbon::now()->addHours(12)
-        );
-
-        return response()->json(['status' => $key]);
     }
 
     private function haventAsked(string $key, string $conversationId): bool
@@ -108,7 +104,7 @@ class TelegramBotWebhookController extends Controller
         return Cache::missing(sprintf('%s-%s', $key, $conversationId));
     }
 
-    private function tryToAssignTelegramIdToUser(string $telegramUserId): JsonResponse
+    private function tryToAssignTelegramIdToUser(string|int $telegramUserId): JsonResponse
     {
         $code = trim(Arr::get(explode('/start', $message ?? ''), 1, ''));
 
@@ -140,21 +136,5 @@ class TelegramBotWebhookController extends Controller
         } catch (DecryptException $e) {
             return response()->json(['status' => 'invalid-code']);
         }
-    }
-
-    private function isMoodAnswer(Request $request): bool
-    {
-        return Arr::get($request->all(), 'callback_query.message.text') === AskUserMoodNotification::QUESTION;
-    }
-
-    private function isSleepQualityAnswer(Request $request): bool
-    {
-        return Arr::get($request->all(), 'callback_query.message.text') === AskUserSleepQualityNotification::QUESTION;
-    }
-
-    private function isWakeUpStateAnswer(Request $request): bool
-    {
-        return Arr::get($request->all(), 'callback_query.message.text') === AskUserWakeUpStateNotification::QUESTION;
-
     }
 }

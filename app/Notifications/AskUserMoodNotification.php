@@ -5,40 +5,26 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Enums\MoodEnum;
+use App\Enums\QuestionsEnum;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
 use NotificationChannels\Telegram\TelegramBase;
-use NotificationChannels\Telegram\TelegramMessage;
 
-class AskUserMoodNotification extends Notification implements ShouldQueue
+class AskUserMoodNotification extends TelegramQuestion
 {
-    use Queueable;
-
-    const QUESTION = 'How did you felt today?';
-
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(User $notifiable): array
+    public static function question(): string
     {
-        return ['telegram'];
+        return __('How did you felt today?');
+    }
+
+    public static function name(): QuestionsEnum
+    {
+        return QuestionsEnum::MOOD;
     }
 
     public function toTelegram(User $notifiable): TelegramBase
     {
+        $message = parent::toTelegram($notifiable);
 
-        $message = TelegramMessage::create()
-            ->to($notifiable->telegram_user_id)
-            ->line(self::QUESTION);
-
-        foreach (MoodEnum::values() as $mood) {
-            $message->buttonWithCallback(sprintf('%s %s', $mood->emoji(), $mood->description()), $mood->value);
-        }
-
-        return $message;
+        return $this->withOptions($message, MoodEnum::values());
     }
 }

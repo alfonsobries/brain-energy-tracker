@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
-use App\Notifications\AskUserMoodNotification;
 use Illuminate\Console\Command;
 
 class StartConversation extends Command
@@ -29,12 +28,8 @@ class StartConversation extends Command
     {
         $userId = $this->option('user-id');
 
-        // Start conversation session
-
         $user = $userId === null ? User::whereEmail(config('site.admin.email'))->first() : User::findOrFail($userId);
 
         $user->startConversation();
-
-        $user->notifyNow(new AskUserMoodNotification());
     }
 }

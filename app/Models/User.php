@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\QuestionsEnum;
+use App\Notifications\TelegramQuestion;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -64,10 +67,17 @@ class User extends Authenticatable
             value: uniqid(),
             ttl: Carbon::now()->addHours(12)
         );
+
+        $this->ask(QuestionsEnum::fromIndex(0)->notification());
     }
 
     public function getConversationId(): ?string
     {
         return Cache::get($this->conversationKey());
+    }
+
+    public function ask(TelegramQuestion $question): void
+    {
+        $this->notifyNow($question);
     }
 }

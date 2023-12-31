@@ -4,40 +4,27 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Enums\QuestionsEnum;
 use App\Enums\SleepQualityEnum;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
 use NotificationChannels\Telegram\TelegramBase;
-use NotificationChannels\Telegram\TelegramMessage;
 
-class AskUserSleepQualityNotification extends Notification implements ShouldQueue
+class AskUserSleepQualityNotification extends TelegramQuestion
 {
-    use Queueable;
-
-    const QUESTION = 'How did you sleep last night?';
-
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(User $notifiable): array
+    public static function question(): string
     {
-        return ['telegram'];
+        return __('How did you sleep last night?');
+    }
+
+    public static function name(): QuestionsEnum
+    {
+        return QuestionsEnum::SLEEP_QUALITY;
     }
 
     public function toTelegram(User $notifiable): TelegramBase
     {
-        $message = TelegramMessage::create()
-            ->to($notifiable->telegram_user_id)
-            ->line(self::QUESTION);
+        $message = parent::toTelegram($notifiable);
 
-        foreach (SleepQualityEnum::values() as $mood) {
-            $message->buttonWithCallback(sprintf('%s %s', $mood->emoji(), $mood->description()), $mood->value);
-        }
-
-        return $message;
+        return $this->withOptions($message, SleepQualityEnum::values());
     }
 }

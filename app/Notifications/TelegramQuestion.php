@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Cache;
 use NotificationChannels\Telegram\TelegramBase;
 use NotificationChannels\Telegram\TelegramMessage;
 
@@ -30,6 +31,18 @@ abstract class TelegramQuestion extends Notification implements ShouldQueue
         return ['telegram'];
     }
 
+    private function questionCacheKey($conversationId): string
+    {
+        $name = $this->name();
+
+        return $name->cacheKey($conversationId).'-'.$name->value;
+    }
+
+    public function notAskedYet(string $conversationId): bool
+    {
+        return Cache::missing($this->questionCacheKey($conversationId));
+    }
+
     public function withOptions(TelegramBase $message, array $options): TelegramBase
     {
         foreach ($options as $option) {
@@ -39,9 +52,16 @@ abstract class TelegramQuestion extends Notification implements ShouldQueue
         return $message;
     }
 
+    public function storeQuestionAsked(string $conversationId): void
+    {
+        $cacheKey = $this->questionCacheKey($conversationId);
+
+        Cache::put($cacheKey, true, now()->addHours(12));
+    }
+
     public function toTelegram(User $notifiable): TelegramBase
     {
-        // $enum = $this->name();
+        $this->storeQuestionAsked($notifiable->getConversationId());
 
         $message = TelegramMessage::create();
 

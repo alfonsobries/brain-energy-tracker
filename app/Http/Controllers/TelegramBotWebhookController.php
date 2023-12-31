@@ -67,12 +67,19 @@ class TelegramBotWebhookController extends Controller
             return response()->json(['status' => 'no-conversation-id']);
         }
 
-        $messageText = Arr::get($request->all(), 'callback_query.message.text', '');
+        $question = Arr::get($request->all(), 'callback_query.message.text', '');
 
-        $question = QuestionsEnum::fromQuestion($messageText);
+        $question = QuestionsEnum::fromQuestion($question);
+
+        $answerText = Arr::get($request->all(), 'callback_query.data', Arr::get($request->all(), 'message.text', ''));
 
         if ($question === null) {
-            Log::info('No question found', ['telegram_user_id' => $telegramUserId, 'message_text' => $messageText]);
+            $question = QuestionsEnum::lastAsked($conversationId);
+
+        }
+
+        if ($question === null) {
+            Log::info('No question found', ['telegram_user_id' => $telegramUserId, 'question' => $question]);
 
             return response()->json(['status' => 'no-question']);
         }
@@ -80,7 +87,7 @@ class TelegramBotWebhookController extends Controller
         try {
             $question->storeAnswerInCache(
                 conversationId: $conversationId,
-                answerText: Arr::get($request->all(), 'callback_query.data', '')
+                answerText: $answerText
             );
 
             $question = $question->nextQuestion();
@@ -91,7 +98,7 @@ class TelegramBotWebhookController extends Controller
                 return response()->json(['status' => 'next-question']);
             }
         } catch (\Exception $e) {
-            Log::info('Invalid answer', ['telegram_user_id' => $telegramUserId, 'message_text' => $messageText]);
+            Log::info('Invalid answer', ['telegram_user_id' => $telegramUserId, 'question' => $question, 'error' => $e->getMessage()]);
 
             return response()->json(['status' => 'invalid-answer']);
         }

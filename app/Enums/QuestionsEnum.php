@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use App\Notifications\AskSymptomsNotification;
 use App\Notifications\AskUserMoodNotification;
 use App\Notifications\AskUserSleepQualityNotification;
 use App\Notifications\AskUserWakeUpStateNotification;
@@ -17,21 +18,26 @@ enum QuestionsEnum: string
 
     case WAKE_UP_STATE = 'wake-up-state';
 
+    case SYMPTOMS = 'symptoms';
+
     public function index(): int
     {
         return match ($this) {
             self::MOOD => 0,
             self::SLEEP_QUALITY => 1,
             self::WAKE_UP_STATE => 2,
+            self::SYMPTOMS => 3,
         };
     }
 
-    public static function fromIndex(int $index): QuestionsEnum
+    public static function fromIndex(int $index): ?QuestionsEnum
     {
         return match ($index) {
             0 => self::MOOD,
             1 => self::SLEEP_QUALITY,
             2 => self::WAKE_UP_STATE,
+            3 => self::SYMPTOMS,
+            default => null,
         };
     }
 
@@ -41,8 +47,26 @@ enum QuestionsEnum: string
             AskUserMoodNotification::question() => self::MOOD,
             AskUserSleepQualityNotification::question() => self::SLEEP_QUALITY,
             AskUserWakeUpStateNotification::question() => self::WAKE_UP_STATE,
+            AskSymptomsNotification::question() => self::SYMPTOMS,
             default => null,
         };
+    }
+
+    public static function lastAsked(string $conversationId): ?QuestionsEnum
+    {
+        for ($index = 3; $index >= 0; $index--) {
+            /**
+             * @var QuestionsEnum $question
+             */
+            $question = self::fromIndex($index);
+
+            if ($question?->notification()->alreadyAsked($conversationId)) {
+                return $question;
+            }
+        }
+
+        return null;
+
     }
 
     public function notification(): TelegramQuestion
@@ -51,15 +75,19 @@ enum QuestionsEnum: string
             self::MOOD => new AskUserMoodNotification(),
             self::SLEEP_QUALITY => new AskUserSleepQualityNotification(),
             self::WAKE_UP_STATE => new AskUserWakeUpStateNotification(),
+            self::SYMPTOMS => new AskSymptomsNotification(),
         };
     }
 
-    public function answerEnum(): string
+    public function answerEnum(): ?string
     {
         return match ($this) {
             self::MOOD => MoodEnum::class,
             self::SLEEP_QUALITY => SleepQualityEnum::class,
             self::WAKE_UP_STATE => WakeUpStateEnum::class,
+            // not applicable
+            // self::SYMPTOMS => SymptomsEnum::class,
+            default => null,
         };
     }
 
@@ -67,11 +95,9 @@ enum QuestionsEnum: string
     {
         $index = $this->index();
 
-        if ($index === 2) {
-            return null;
-        }
+        $question = self::fromIndex($index + 1);
 
-        return self::fromIndex($index + 1)->notification();
+        return $question?->notification();
     }
 
     public function cacheKey(string $conversationId): string
@@ -83,27 +109,35 @@ enum QuestionsEnum: string
     {
         $cacheKey = $this->cacheKey($conversationId);
 
-        $answer = $this->answerEnum()::fromString($answerText);
+        $answerEnum = $this->answerEnum();
 
-        if ($answer === null) {
-            throw new \Exception('Invalid answer');
-        }
+        if ($answerEnum !== null) {
+            $answer = $answerEnum::fromString($answerText);
 
-        $prevAnswers = Cache::get($cacheKey);
+            if ($answer === null) {
+                throw new \Exception('Invalid answer');
+            }
 
-        if ($prevAnswers) {
-            $answers = json_decode($prevAnswers, true);
-            $answers[] = $answer->value;
+            $prevAnswers = Cache::get($cacheKey);
+
+            if ($prevAnswers) {
+                $answers = json_decode($prevAnswers, true);
+                $answers[] = $answer->value;
+            } else {
+                $answers = [$answer->value];
+            }
+
+            $storedAnswer = json_encode(array_unique($answers));
         } else {
-            $answers = [$answer->value];
+            $storedAnswer = $answerText;
         }
 
         Cache::put(
             key: $cacheKey,
-            value: json_encode(array_unique($answers)),
+            value: $storedAnswer,
             ttl: Carbon::now()->addHours(12)
         );
 
-        info('Answer stored in cache', ['cache_key' => $cacheKey, 'answers' => array_unique($answers)]);
+        info('Answer stored in cache', ['cache_key' => $cacheKey, 'answers' => isset($answers) ? array_unique($answers) : $answerText]);
     }
 }

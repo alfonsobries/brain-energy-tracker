@@ -43,6 +43,11 @@ abstract class TelegramQuestion extends Notification implements ShouldQueue
         return Cache::missing($this->questionCacheKey($conversationId));
     }
 
+    public function alreadyAsked(string $conversationId): bool
+    {
+        return ! $this->notAskedYet($conversationId);
+    }
+
     public function withOptions(TelegramBase $message, array $options): TelegramBase
     {
         foreach ($options as $option) {

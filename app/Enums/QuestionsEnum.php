@@ -118,26 +118,24 @@ enum QuestionsEnum: string
                 throw new \Exception('Invalid answer');
             }
 
-            $prevAnswers = Cache::get($cacheKey);
+            $answerText = $answer->value;
+        }
 
-            if ($prevAnswers) {
-                $answers = json_decode($prevAnswers, true);
-                $answers[] = $answer->value;
-            } else {
-                $answers = [$answer->value];
-            }
+        $prevAnswers = Cache::get($cacheKey);
 
-            $storedAnswer = json_encode(array_unique($answers));
+        if ($prevAnswers) {
+            $answers = json_decode($prevAnswers, true);
+            $answers[] = $answerText;
         } else {
-            $storedAnswer = $answerText;
+            $answers = [$answerText];
         }
 
         Cache::put(
             key: $cacheKey,
-            value: $storedAnswer,
+            value: json_encode(array_unique($answers)),
             ttl: Carbon::now()->addHours(12)
         );
 
-        info('Answer stored in cache', ['cache_key' => $cacheKey, 'answers' => isset($answers) ? array_unique($answers) : $answerText]);
+        info('Answer stored in cache', ['cache_key' => $cacheKey, 'answers' => $answers]);
     }
 }

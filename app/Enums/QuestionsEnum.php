@@ -5,6 +5,7 @@ namespace App\Enums;
 use App\Notifications\AskBreakfast;
 use App\Notifications\AskDinner;
 use App\Notifications\AskLunch;
+use App\Notifications\AskSnack;
 use App\Notifications\AskSymptomsNotification;
 use App\Notifications\AskUserMoodNotification;
 use App\Notifications\AskUserSleepQualityNotification;
@@ -29,6 +30,8 @@ enum QuestionsEnum: string
 
     case DINNER = 'dinner';
 
+    case SNACK = 'snack';
+
     public function index(): int
     {
         return match ($this) {
@@ -39,6 +42,7 @@ enum QuestionsEnum: string
             self::BREAKFAST => 4,
             self::LUNCH => 5,
             self::DINNER => 6,
+            self::SNACK => 7,
         };
     }
 
@@ -52,6 +56,7 @@ enum QuestionsEnum: string
             4 => self::BREAKFAST,
             5 => self::LUNCH,
             6 => self::DINNER,
+            7 => self::SNACK,
             default => null,
         };
     }
@@ -66,6 +71,7 @@ enum QuestionsEnum: string
             AskBreakfast::question() => self::BREAKFAST,
             AskLunch::question() => self::LUNCH,
             AskDinner::question() => self::DINNER,
+            AskSnack::question() => self::SNACK,
             default => null,
         };
     }
@@ -80,6 +86,7 @@ enum QuestionsEnum: string
             self::BREAKFAST => new AskBreakfast(),
             self::LUNCH => new AskLunch(),
             self::DINNER => new AskDinner(),
+            self::SNACK => new AskSnack(),
         };
     }
 
@@ -94,6 +101,7 @@ enum QuestionsEnum: string
             // self::BREAKFAST => null,
             // self::LUNCH => null,
             // self::DINNER => null,
+            // self::SNACK => null,
             default => null,
         };
     }
@@ -131,6 +139,26 @@ enum QuestionsEnum: string
 
     }
 
+    public function storedAnswers(string $conversationId): array
+    {
+        $cacheKey = $this->cacheKey($conversationId);
+
+        $answers = Cache::get($cacheKey);
+
+        if ($answers) {
+            return json_decode($answers, true);
+        }
+
+        return [];
+    }
+
+    public function storedAnswer(string $conversationId): string
+    {
+        $cacheKey = $this->cacheKey($conversationId);
+
+        return Cache::get($cacheKey) ?? '';
+    }
+
     public function storeAnswerInCache(string $conversationId, string $answerText): void
     {
         $cacheKey = $this->cacheKey($conversationId);
@@ -145,23 +173,22 @@ enum QuestionsEnum: string
             }
 
             $answerText = $answer->value;
-        }
 
-        $prevAnswers = Cache::get($cacheKey);
+            $answers = $this->storedAnswers($conversationId);
 
-        if ($prevAnswers) {
-            $answers = json_decode($prevAnswers, true);
             $answers[] = $answerText;
+
+            $value = json_encode(array_unique($answers));
         } else {
-            $answers = [$answerText];
+            $value = $answerText;
         }
 
         Cache::put(
             key: $cacheKey,
-            value: json_encode(array_unique($answers)),
-            ttl: Carbon::now()->addHours(12)
+            value: $value,
+            ttl: Carbon::now()->addHours(18)
         );
 
-        info('Answer stored in cache', ['cache_key' => $cacheKey, 'answers' => $answers]);
+        info('Answer stored in cache', ['cache_key' => $cacheKey, 'answers' => $value]);
     }
 }

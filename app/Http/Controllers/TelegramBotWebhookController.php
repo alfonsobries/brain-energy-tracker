@@ -75,7 +75,6 @@ class TelegramBotWebhookController extends Controller
 
         if ($question === null) {
             $question = QuestionsEnum::lastAsked($conversationId);
-
         }
 
         if ($question === null) {
@@ -92,13 +91,19 @@ class TelegramBotWebhookController extends Controller
 
             $question = $question->nextQuestion();
 
-            if ($question !== null && $question->notAskedYet($conversationId)) {
-                $user->ask($question);
+            if ($question !== null) {
+                if ($question->notAskedYet($conversationId)) {
+                    $user->ask($question);
+                }
 
                 return response()->json(['status' => 'next-question']);
+            } else {
+                $user->storeAnwers();
             }
         } catch (\Exception $e) {
-            Log::info('Invalid answer', ['telegram_user_id' => $telegramUserId, 'question' => $question, 'error' => $e->getMessage()]);
+            Log::info('Invalid answer', ['telegram_user_id' => $telegramUserId, 'question' => $question, 'answer' => $answerText, 'error' => $e->getMessage()]);
+
+            throw $e;
 
             return response()->json(['status' => 'invalid-answer']);
         }

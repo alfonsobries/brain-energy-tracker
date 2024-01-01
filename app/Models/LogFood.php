@@ -11,5 +11,14 @@ class LogFood extends Model
 
     protected $casts = [
         'main_ingredients' => 'array',
+        'common_allergens' => 'array',
+        'calories' => 'float',
+        'sugar' => 'float',
+        'protein' => 'float',
+        'fat' => 'float',
+        'carbohydrates' => 'float',
+        'fiber' => 'float',
     ];
+
+    protected $guarded = [];
 }

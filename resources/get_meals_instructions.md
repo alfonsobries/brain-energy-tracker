@@ -1,35 +1,39 @@
-Based on the food descriptions you receive, organize the relevant information in a JSON format for database storage. The required details are:
+Based on the food descriptions provided, organize the information in a JSON format for database storage. The details to include for each meal are:
 
-- calories
-- sugar
-- protein
-- fat
-- carbohydrates
-- fiber
-- gluten_level (high, medium, low, present, none)
-- lactose_level (high, medium, low, present, none)
-- common_allergens (in a JSON array format)
+- `calories`
+- `sugar`
+- `protein`
+- `fat`
+- `carbohydrates`
+- `fiber`
+- `gluten_level` (options: high, medium, low, present, none)
+- `lactose_level` (options: high, medium, low, present, none)
+- `common_allergens` (formatted as a JSON array)
+- `description`: This should be the exact meal description you provide.
 
-Each meal should be a separate record. In the absence of specific details, provide estimates based on your knowledge, for example, typical nutritional values of a cake or an average amount of meat consumed in a meal. Exceptions for returning a null value are minimal, only when there is no information available about a food. To be clear, you should give a value in almost all cases.
+Each meal should be logged as a separate record. When specific details are not provided, use your best judgment to estimate values, doesnt need to be exact. For example, if you only mention "cake," provide typical nutritional values for a standard serving of cake. If the meal description combines two foods, combine their nutritional values accordingly. Zero (0) is a valid value for any category where applicable, such as water having zero calories. Use `null` as a value only in very rare cases when there is no information available about a food item, and you dont make an educated guess. In most situations, a value should be provided.
 
-For gluten_level and lactose_level, consider:
-
-- high: is considered for food that is high in the macronutrient
-- medium: is considered for food that contains the macronutrient, but not in high quantity
-- low: is considered for food that contains a small amount of the macronutrient in low quantities
-- present: the macronutrient is *usually* found due to how the food is cooked, but it is not a part of the food
-- none: the food never or usually does not contain the nutrient
+For `gluten_level` and `lactose_level`, use the following categories:
+- `high`: For foods rich in the specific macronutrient.
+- `medium`: For foods containing the macronutrient, but not in large quantities.
+- `low`: For foods with a small amount of the macronutrient.
+- `present`: The macronutrient is not an inherent part of the food but is typically introduced during cooking.
+- `none`: The food does not contain the nutrient.
 
 **Example Description:**
 
-"For breakfast, I had scrambled eggs with spinach and a glass of orange juice. For lunch, I ate a chicken salad with mustard and honey dressing, accompanied by whole wheat bread. For dinner, I opted for a grilled salmon fillet with quinoa and broccoli."
+```
+Breakfast: Scrambled eggs with spinach and a glass of orange juice.
+Lunch: Chicken salad with mustard and honey dressing, accompanied by whole wheat bread.
+Dinner: Grilled salmon fillet with quinoa and broccoli.
+```
 
 **Expected Output Format Example:**
 
 ```json
 [
   {
-    "meal": "Breakfast",
+    "name": "Breakfast",
     "main_ingredients": ["eggs", "spinach", "orange juice"],
     "calories": 250,
     "sugar": 20,
@@ -39,10 +43,11 @@ For gluten_level and lactose_level, consider:
     "fiber": 2,
     "common_allergens": ["eggs"],
     "gluten_level": "none",
-    "lactose_level": "none"
+    "lactose_level": "none",
+    "description": "Scrambled eggs with spinach and a glass of orange juice."
   },
   {
-    "meal": "Lunch",
+    "name": "Lunch",
     "main_ingredients": ["chicken", "mustard", "honey", "whole wheat bread"],
     "calories": 350,
     "sugar": 5,
@@ -52,10 +57,11 @@ For gluten_level and lactose_level, consider:
     "fiber": 5,
     "common_allergens": ["wheat"],
     "gluten_level": "high",
-    "lactose_level": "none"
+    "lactose_level": "none",
+    "description": "Chicken salad with mustard and honey dressing, accompanied by whole wheat bread."
   },
   {
-    "meal": "Dinner",
+    "name": "Dinner",
     "main_ingredients": ["salmon", "quinoa", "broccoli"],
     "calories": 400,
     "sugar": 3,
@@ -65,16 +71,16 @@ For gluten_level and lactose_level, consider:
     "fiber": 6,
     "common_allergens": ["fish"],
     "gluten_level": "none",
-    "lactose_level": "none"
+    "lactose_level": "none",
+    "description": "Grilled salmon fillet with quinoa and broccoli."
   }
 ]
 ```
 
-Remember, only return valid JSON, including the JSON structure as shown above. Under no circumstances should you return anything else. The values must be in English, regardless of the language of the input.
+Please ensure the returned JSON is valid and structured as shown above. The output should exclusively consist of the JSON data, with no additional text or explanations. All values must be in English, regardless of the language of the input.
 
-IMPORTANT: please do not return any other text that is not the JSON, no explanations, no considerations, no follow-up question, nothing just a plain valid JSON.
+**IMPORTANT:** Only the JSON output should be returned. No explanations, considerations, follow-up questions, or additional text should be included.
 
-
-## Food description:
+## Food Description:
 
 %s

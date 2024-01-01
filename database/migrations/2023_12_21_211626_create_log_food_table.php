@@ -15,6 +15,8 @@ return new class extends Migration
         Schema::create('log_food', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Log::class, 'log_id');
+            $table->string('name')->nullable();
+            $table->text('description')->nullable();
             $table->json('main_ingredients')->nullable();
             $table->float('calories')->nullable();
             $table->float('sugar')->nullable();
@@ -24,7 +26,7 @@ return new class extends Migration
             $table->float('fiber')->nullable();
             $table->string('gluten_level')->nullable();
             $table->string('lactose_level')->nullable();
-            $table->text('common_allergens')->nullable();
+            $table->json('common_allergens')->nullable();
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Enums\QuestionsEnum;
+use App\Jobs\GetFoodLog;
 use App\Notifications\TelegramQuestion;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -65,7 +66,7 @@ class User extends Authenticatable
         Cache::put(
             key: $this->conversationKey(),
             value: uniqid(),
-            ttl: Carbon::now()->addHours(12)
+            ttl: Carbon::now()->addHours(18)
         );
 
         $this->ask(QuestionsEnum::fromIndex(0)->notification());
@@ -79,5 +80,45 @@ class User extends Authenticatable
     public function ask(TelegramQuestion $question): void
     {
         $this->notifyNow($question);
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(Log::class);
+    }
+
+    public function storeAnwers(): void
+    {
+        $conversationId = $this->getConversationId();
+
+        $log = $this->logs()->create([
+            'mood' => QuestionsEnum::MOOD->storedAnswers($conversationId),
+            'sleep_quality' => QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
+            'wake_up_state' => QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
+            'symptoms' => QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
+        ]);
+
+        $template = <<<'EOT'
+Breakfast: %s
+
+Lunch: %s
+
+Dinner: %s
+
+Snack: %s
+
+EOT;
+
+        $foodDescription = sprintf(
+            $template,
+            QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
+            QuestionsEnum::LUNCH->storedAnswer($conversationId),
+            QuestionsEnum::DINNER->storedAnswer($conversationId),
+            QuestionsEnum::SNACK->storedAnswer($conversationId)
+        );
+
+        GetFoodLog::dispatch($log, $foodDescription);
+
+        Cache::forget($this->conversationKey());
     }
 }

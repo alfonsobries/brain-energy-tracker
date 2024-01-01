@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use App\Notifications\AskBreakfast;
 use App\Notifications\AskSymptomsNotification;
 use App\Notifications\AskUserMoodNotification;
 use App\Notifications\AskUserSleepQualityNotification;
@@ -20,23 +21,27 @@ enum QuestionsEnum: string
 
     case SYMPTOMS = 'symptoms';
 
+    case BREAKFAST = 'breakfast';
+
     public function index(): int
     {
         return match ($this) {
-            self::MOOD => 0,
-            self::SLEEP_QUALITY => 1,
-            self::WAKE_UP_STATE => 2,
+            self::SLEEP_QUALITY => 0,
+            self::WAKE_UP_STATE => 1,
+            self::MOOD => 2,
             self::SYMPTOMS => 3,
+            self::BREAKFAST => 4,
         };
     }
 
     public static function fromIndex(int $index): ?QuestionsEnum
     {
         return match ($index) {
-            0 => self::MOOD,
-            1 => self::SLEEP_QUALITY,
-            2 => self::WAKE_UP_STATE,
+            0 => self::SLEEP_QUALITY,
+            1 => self::WAKE_UP_STATE,
+            2 => self::MOOD,
             3 => self::SYMPTOMS,
+            4 => self::BREAKFAST,
             default => null,
         };
     }
@@ -48,15 +53,18 @@ enum QuestionsEnum: string
             AskUserSleepQualityNotification::question() => self::SLEEP_QUALITY,
             AskUserWakeUpStateNotification::question() => self::WAKE_UP_STATE,
             AskSymptomsNotification::question() => self::SYMPTOMS,
+            AskBreakfast::question() => self::BREAKFAST,
             default => null,
         };
     }
 
     public static function lastAsked(string $conversationId): ?QuestionsEnum
     {
-        for ($index = 3; $index >= 0; $index--) {
+        $total = count(self::cases());
+
+        for ($index = $total; $index >= 0; $index--) {
             /**
-             * @var QuestionsEnum $question
+             * @var \App\Enums\QuestionsEnum $question
              */
             $question = self::fromIndex($index);
 
@@ -76,6 +84,7 @@ enum QuestionsEnum: string
             self::SLEEP_QUALITY => new AskUserSleepQualityNotification(),
             self::WAKE_UP_STATE => new AskUserWakeUpStateNotification(),
             self::SYMPTOMS => new AskSymptomsNotification(),
+            self::BREAKFAST => new AskBreakfast(),
         };
     }
 
@@ -85,8 +94,9 @@ enum QuestionsEnum: string
             self::MOOD => MoodEnum::class,
             self::SLEEP_QUALITY => SleepQualityEnum::class,
             self::WAKE_UP_STATE => WakeUpStateEnum::class,
+            self::SYMPTOMS => SymptomEnum::class,
             // not applicable
-            // self::SYMPTOMS => SymptomsEnum::class,
+            self::BREAKFAST => null,
             default => null,
         };
     }

@@ -25,6 +25,6 @@ class AskUserWakeUpStateNotification extends TelegramQuestion
     {
         $message = parent::toTelegram($notifiable);
 
-        return $this->withOptions($message, WakeUpStateEnum::values());
+        return $this->withOptions($message, WakeUpStateEnum::cases());
     }
 }

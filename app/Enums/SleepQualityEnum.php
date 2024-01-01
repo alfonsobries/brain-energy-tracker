@@ -50,31 +50,4 @@ enum SleepQualityEnum: string
             self::NIGHTMARES => 'Nightmares',
         };
     }
-
-    public static function values(): array
-    {
-        return [
-            self::WELL,
-            self::POORLY,
-            self::RESTLESSLY,
-            self::SOUNDLY,
-            self::BRIEFLY,
-            self::INTERMITTENTLY,
-            self::PEACEFULLY,
-            self::FITFULLY,
-            self::UNCOMFORTABLY,
-            self::NIGHTMARES,
-        ];
-    }
-
-    public static function fromString(string $value): ?self
-    {
-        foreach (self::cases() as $case) {
-            if ($case->value === $value) {
-                return $case;
-            }
-        }
-
-        return null;
-    }
 }

@@ -72,7 +72,7 @@ abstract class TelegramQuestion extends Notification implements ShouldQueue
 
         $message->to($notifiable->telegram_user_id);
 
-        $message->line($this->question());
+        $message->content('*'.$this->question().'*'."\n\n");
 
         return $message;
     }

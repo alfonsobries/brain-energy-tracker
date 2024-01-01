@@ -47,19 +47,4 @@ enum MoodEnum: string
             self::TIRED => 'Tired',
         };
     }
-
-    public static function values(): array
-    {
-        return [
-            self::HAPPY,
-            self::SAD,
-            self::EUPHORIC,
-            self::DEPRESSED,
-            self::ANXIOUS,
-            self::CALM,
-            self::ANGRY,
-            self::MOTIVATED,
-            self::TIRED,
-        ];
-    }
 }

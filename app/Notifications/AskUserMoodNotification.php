@@ -25,6 +25,6 @@ class AskUserMoodNotification extends TelegramQuestion
     {
         $message = parent::toTelegram($notifiable);
 
-        return $this->withOptions($message, MoodEnum::values());
+        return $this->withOptions($message, MoodEnum::cases());
     }
 }

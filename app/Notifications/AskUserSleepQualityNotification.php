@@ -25,6 +25,6 @@ class AskUserSleepQualityNotification extends TelegramQuestion
     {
         $message = parent::toTelegram($notifiable);
 
-        return $this->withOptions($message, SleepQualityEnum::values());
+        return $this->withOptions($message, SleepQualityEnum::cases());
     }
 }

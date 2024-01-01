@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Notifications\AskBreakfast;
+use App\Notifications\AskDinner;
 use App\Notifications\AskLunch;
 use App\Notifications\AskSymptomsNotification;
 use App\Notifications\AskUserMoodNotification;
@@ -26,6 +27,8 @@ enum QuestionsEnum: string
 
     case LUNCH = 'lunch';
 
+    case DINNER = 'dinner';
+
     public function index(): int
     {
         return match ($this) {
@@ -35,6 +38,7 @@ enum QuestionsEnum: string
             self::SYMPTOMS => 3,
             self::BREAKFAST => 4,
             self::LUNCH => 5,
+            self::DINNER => 6,
         };
     }
 
@@ -47,6 +51,7 @@ enum QuestionsEnum: string
             3 => self::SYMPTOMS,
             4 => self::BREAKFAST,
             5 => self::LUNCH,
+            6 => self::DINNER,
             default => null,
         };
     }
@@ -60,6 +65,7 @@ enum QuestionsEnum: string
             AskSymptomsNotification::question() => self::SYMPTOMS,
             AskBreakfast::question() => self::BREAKFAST,
             AskLunch::question() => self::LUNCH,
+            AskDinner::question() => self::DINNER,
             default => null,
         };
     }
@@ -73,6 +79,7 @@ enum QuestionsEnum: string
             self::SYMPTOMS => new AskSymptomsNotification(),
             self::BREAKFAST => new AskBreakfast(),
             self::LUNCH => new AskLunch(),
+            self::DINNER => new AskDinner(),
         };
     }
 
@@ -86,6 +93,7 @@ enum QuestionsEnum: string
             // not applicable
             // self::BREAKFAST => null,
             // self::LUNCH => null,
+            // self::DINNER => null,
             default => null,
         };
     }

@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Notifications\AskBreakfast;
+use App\Notifications\AskLunch;
 use App\Notifications\AskSymptomsNotification;
 use App\Notifications\AskUserMoodNotification;
 use App\Notifications\AskUserSleepQualityNotification;
@@ -23,6 +24,8 @@ enum QuestionsEnum: string
 
     case BREAKFAST = 'breakfast';
 
+    case LUNCH = 'lunch';
+
     public function index(): int
     {
         return match ($this) {
@@ -31,6 +34,7 @@ enum QuestionsEnum: string
             self::MOOD => 2,
             self::SYMPTOMS => 3,
             self::BREAKFAST => 4,
+            self::LUNCH => 5,
         };
     }
 
@@ -42,6 +46,7 @@ enum QuestionsEnum: string
             2 => self::MOOD,
             3 => self::SYMPTOMS,
             4 => self::BREAKFAST,
+            5 => self::LUNCH,
             default => null,
         };
     }
@@ -54,8 +59,49 @@ enum QuestionsEnum: string
             AskUserWakeUpStateNotification::question() => self::WAKE_UP_STATE,
             AskSymptomsNotification::question() => self::SYMPTOMS,
             AskBreakfast::question() => self::BREAKFAST,
+            AskLunch::question() => self::LUNCH,
             default => null,
         };
+    }
+
+    public function notification(): TelegramQuestion
+    {
+        return match ($this) {
+            self::MOOD => new AskUserMoodNotification(),
+            self::SLEEP_QUALITY => new AskUserSleepQualityNotification(),
+            self::WAKE_UP_STATE => new AskUserWakeUpStateNotification(),
+            self::SYMPTOMS => new AskSymptomsNotification(),
+            self::BREAKFAST => new AskBreakfast(),
+            self::LUNCH => new AskLunch(),
+        };
+    }
+
+    public function answerEnum(): ?string
+    {
+        return match ($this) {
+            self::MOOD => MoodEnum::class,
+            self::SLEEP_QUALITY => SleepQualityEnum::class,
+            self::WAKE_UP_STATE => WakeUpStateEnum::class,
+            self::SYMPTOMS => SymptomEnum::class,
+            // not applicable
+            // self::BREAKFAST => null,
+            // self::LUNCH => null,
+            default => null,
+        };
+    }
+
+    public function nextQuestion(): ?TelegramQuestion
+    {
+        $index = $this->index();
+
+        $question = self::fromIndex($index + 1);
+
+        return $question?->notification();
+    }
+
+    public function cacheKey(string $conversationId): string
+    {
+        return sprintf('%s-%s', $this->value, $conversationId);
     }
 
     public static function lastAsked(string $conversationId): ?QuestionsEnum
@@ -75,44 +121,6 @@ enum QuestionsEnum: string
 
         return null;
 
-    }
-
-    public function notification(): TelegramQuestion
-    {
-        return match ($this) {
-            self::MOOD => new AskUserMoodNotification(),
-            self::SLEEP_QUALITY => new AskUserSleepQualityNotification(),
-            self::WAKE_UP_STATE => new AskUserWakeUpStateNotification(),
-            self::SYMPTOMS => new AskSymptomsNotification(),
-            self::BREAKFAST => new AskBreakfast(),
-        };
-    }
-
-    public function answerEnum(): ?string
-    {
-        return match ($this) {
-            self::MOOD => MoodEnum::class,
-            self::SLEEP_QUALITY => SleepQualityEnum::class,
-            self::WAKE_UP_STATE => WakeUpStateEnum::class,
-            self::SYMPTOMS => SymptomEnum::class,
-            // not applicable
-            self::BREAKFAST => null,
-            default => null,
-        };
-    }
-
-    public function nextQuestion(): ?TelegramQuestion
-    {
-        $index = $this->index();
-
-        $question = self::fromIndex($index + 1);
-
-        return $question?->notification();
-    }
-
-    public function cacheKey(string $conversationId): string
-    {
-        return sprintf('%s-%s', $this->value, $conversationId);
     }
 
     public function storeAnswerInCache(string $conversationId, string $answerText): void

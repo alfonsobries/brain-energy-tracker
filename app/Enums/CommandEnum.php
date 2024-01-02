@@ -4,8 +4,6 @@ namespace App\Enums;
 
 enum CommandEnum: string
 {
-    case START_SESSION = 'startsession';
-
     case FINISH_SESSION = 'finish';
 
     case DINNER = 'dinner';
@@ -27,7 +25,6 @@ enum CommandEnum: string
     public function description(): string
     {
         return match ($this) {
-            self::START_SESSION => 'Start prompt session',
             self::FINISH_SESSION => 'Finish prompt session and store answers',
             self::DINNER => 'Register your dinner',
             self::BREAKFAST => 'Register your breakfast',
@@ -43,7 +40,6 @@ enum CommandEnum: string
     public static function fromString(string $command): ?CommandEnum
     {
         return match ($command) {
-            '/startsession' => self::START_SESSION,
             '/finish' => self::FINISH_SESSION,
             '/dinner' => self::DINNER,
             '/breakfast' => self::BREAKFAST,

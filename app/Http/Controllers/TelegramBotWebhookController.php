@@ -112,7 +112,6 @@ class TelegramBotWebhookController extends Controller
     private function handleCommand(User $user, CommandEnum $command): JsonResponse
     {
         match ($command) {
-            CommandEnum::START_SESSION => $user->startConversation(),
             CommandEnum::FINISH_SESSION => $user->finishConversation(),
             CommandEnum::BREAKFAST => $user->ask(QuestionsEnum::BREAKFAST),
             CommandEnum::DINNER => $user->ask(QuestionsEnum::DINNER),

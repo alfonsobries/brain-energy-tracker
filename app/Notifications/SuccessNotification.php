@@ -57,15 +57,14 @@ EOT;
         });
 
         $content = sprintf($content,
-            collect($this->foodLog->sleep_quality)->pluck('value')->join(', '),
-            collect($this->foodLog->wake_up_state)->pluck('value')->join(', '),
-            collect($this->foodLog->symptoms)->pluck('value')->join(', '),
-            collect($this->foodLog->mood)->pluck('value')->join(', '),
+            collect($this->foodLog->sleep_quality)->map(fn ($item) => $item->emoji().' '.$item->description())->join(', '),
+            collect($this->foodLog->wake_up_state)->map(fn ($item) => $item->emoji().' '.$item->description())->join(', '),
+            collect($this->foodLog->symptoms)->map(fn ($item) => $item->emoji().' '.$item->description())->join(', '),
+            collect($this->foodLog->mood)->map(fn ($item) => $item->emoji().' '.$item->description())->join(', '),
             $tableItems->implode("\n")
         );
 
         // Escape - with \ to avoid markdown formatting
-
         $content = str_replace('-', '\-', $content);
 
         return $message

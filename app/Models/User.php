@@ -72,6 +72,13 @@ class User extends Authenticatable
         $this->startConversation();
     }
 
+    public function restartConversation(): void
+    {
+        Cache::forget($this->conversationKey());
+
+        $this->startConversation();
+    }
+
     public function getConversationId(): ?string
     {
         return Cache::get($this->conversationKey());
@@ -107,10 +114,12 @@ class User extends Authenticatable
             QuestionsEnum::SLEEP_QUALITY->value => QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
             QuestionsEnum::WAKE_UP_STATE->value => QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
             QuestionsEnum::SYMPTOMS->value => QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
+            // notice that im checking for single value for breakfast, lunch and dinner
             QuestionsEnum::BREAKFAST->value => QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
             QuestionsEnum::LUNCH->value => QuestionsEnum::LUNCH->storedAnswer($conversationId),
             QuestionsEnum::DINNER->value => QuestionsEnum::DINNER->storedAnswer($conversationId),
-            QuestionsEnum::SNACK->value => QuestionsEnum::SNACK->storedAnswer($conversationId),
+            // notice that im checking for array for snack
+            QuestionsEnum::SNACK->value => QuestionsEnum::SNACK->storedAnswers($conversationId),
         ];
 
         $empty = array_filter($answers, fn ($answer) => $answer === null || (is_array($answer) && count($answer) === 0));
@@ -150,7 +159,7 @@ EOT;
             QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
             QuestionsEnum::LUNCH->storedAnswer($conversationId),
             QuestionsEnum::DINNER->storedAnswer($conversationId),
-            QuestionsEnum::SNACK->storedAnswer($conversationId),
+            collect(QuestionsEnum::SNACK->storedAnswers($conversationId))->join(', '),
         ];
 
         if (count(array_filter($foods)) > 0) {

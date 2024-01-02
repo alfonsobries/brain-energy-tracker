@@ -175,9 +175,13 @@ enum QuestionsEnum: string
 
     public function storedAnswer(string $conversationId): ?string
     {
-        $cacheKey = $this->cacheKey($conversationId);
+        $answers = $this->storedAnswers($conversationId);
 
-        return Cache::get($cacheKey) ?? null;
+        if (count($answers) === 0) {
+            return null;
+        }
+
+        return $answers[0];
     }
 
     public function storeAnswerInCache(string $conversationId, string $answerText): void
@@ -186,6 +190,8 @@ enum QuestionsEnum: string
 
         $answerEnum = $this->answerEnum();
 
+        $answers = $this->storedAnswers($conversationId);
+
         if ($answerEnum !== null) {
             $answer = $answerEnum::fromString($answerText);
 
@@ -193,23 +199,17 @@ enum QuestionsEnum: string
                 throw new \Exception('Invalid answer');
             }
 
-            $answerText = $answer->value;
-
-            $answers = $this->storedAnswers($conversationId);
-
-            $answers[] = $answerText;
-
-            $value = json_encode(array_unique($answers));
+            $answers[] = $answer->value;
         } else {
-            $value = $answerText;
+            $answers[] = $answerText;
         }
 
         Cache::put(
             key: $cacheKey,
-            value: $value,
+            value: json_encode(array_unique($answers)),
             ttl: Carbon::now()->addHours(18)
         );
 
-        info('Answer stored in cache', ['cache_key' => $cacheKey, 'answers' => $value]);
+        info('Answer stored in cache', ['cache_key' => $cacheKey]);
     }
 }

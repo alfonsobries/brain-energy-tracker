@@ -10,6 +10,7 @@ use App\Notifications\AskSymptomsNotification;
 use App\Notifications\AskUserMoodNotification;
 use App\Notifications\AskUserSleepQualityNotification;
 use App\Notifications\AskUserWakeUpStateNotification;
+use App\Notifications\AskWater;
 use App\Notifications\TelegramQuestion;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -32,6 +33,8 @@ enum QuestionsEnum: string
 
     case SNACK = 'snack';
 
+    case WATER = 'water';
+
     public function index(): int
     {
         return match ($this) {
@@ -43,6 +46,7 @@ enum QuestionsEnum: string
             self::LUNCH => 5,
             self::DINNER => 6,
             self::SNACK => 7,
+            self::WATER => 8,
         };
     }
 
@@ -57,6 +61,7 @@ enum QuestionsEnum: string
             5 => self::LUNCH,
             6 => self::DINNER,
             7 => self::SNACK,
+            8 => self::WATER,
             default => null,
         };
     }
@@ -72,6 +77,7 @@ enum QuestionsEnum: string
             AskLunch::question() => self::LUNCH,
             AskDinner::question() => self::DINNER,
             AskSnack::question() => self::SNACK,
+            AskWater::question() => self::WATER,
             default => null,
         };
     }
@@ -87,6 +93,7 @@ enum QuestionsEnum: string
             'lunch' => self::LUNCH,
             'dinner' => self::DINNER,
             'snack' => self::SNACK,
+            'water' => self::WATER,
             default => null,
         };
     }
@@ -102,6 +109,7 @@ enum QuestionsEnum: string
             self::LUNCH => new AskLunch(),
             self::DINNER => new AskDinner(),
             self::SNACK => new AskSnack(),
+            self::WATER => new AskWater(),
         };
     }
 
@@ -116,6 +124,7 @@ enum QuestionsEnum: string
             self::MOOD => '19:00',
             self::SNACK => '20:00',
             self::DINNER => '21:00',
+            self::WATER => '21:15',
         };
     }
 
@@ -126,6 +135,7 @@ enum QuestionsEnum: string
             self::SLEEP_QUALITY => SleepQualityEnum::class,
             self::WAKE_UP_STATE => WakeUpStateEnum::class,
             self::SYMPTOMS => SymptomEnum::class,
+            self::WATER => WaterAmountEnum::class,
             // not applicable
             // self::BREAKFAST => null,
             // self::LUNCH => null,

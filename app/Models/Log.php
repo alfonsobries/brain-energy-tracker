@@ -6,6 +6,7 @@ use App\Enums\MoodEnum;
 use App\Enums\SleepQualityEnum;
 use App\Enums\SymptomEnum;
 use App\Enums\WakeUpStateEnum;
+use App\Enums\WaterAmountEnum;
 use Illuminate\Database\Eloquent\Casts\AsEnumArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,7 @@ class Log extends Model
         'mood' => AsEnumArrayObject::class.':'.MoodEnum::class,
         'sleep_quality' => AsEnumArrayObject::class.':'.SleepQualityEnum::class,
         'wake_up_state' => AsEnumArrayObject::class.':'.WakeUpStateEnum::class,
+        'water' => WaterAmountEnum::class,
     ];
 
     public function food(): HasMany

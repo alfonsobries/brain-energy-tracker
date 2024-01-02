@@ -122,6 +122,7 @@ class TelegramBotWebhookController extends Controller
             CommandEnum::DINNER => $user->ask(QuestionsEnum::DINNER),
             CommandEnum::SNACK => $user->ask(QuestionsEnum::SNACK),
             CommandEnum::MOOD => $user->ask(QuestionsEnum::MOOD),
+            CommandEnum::WATER => $user->ask(QuestionsEnum::WATER),
             CommandEnum::SLEEP_QUALITY => $user->ask(QuestionsEnum::SLEEP_QUALITY),
             CommandEnum::WAKE_UP_STATE => $user->ask(QuestionsEnum::WAKE_UP_STATE),
             CommandEnum::SYMPTOMS => $user->ask(QuestionsEnum::SYMPTOMS),

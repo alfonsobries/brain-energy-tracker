@@ -12,6 +12,8 @@ enum CommandEnum: string
 
     case SNACK = 'snack';
 
+    case WATER = 'water';
+
     case MOOD = 'mood';
 
     case SLEEP_QUALITY = 'sleepquality';
@@ -33,6 +35,7 @@ enum CommandEnum: string
             self::BREAKFAST => 'Register your breakfast',
             self::LUNCH => 'Register your lunch',
             self::SNACK => 'Register a snack',
+            self::WATER => 'Register your water intake',
             self::SYMPTOMS => 'Register your symptoms',
             self::SLEEP_QUALITY => 'Register your sleep quality',
             self::WAKE_UP_STATE => 'Register your wake up state',
@@ -53,6 +56,7 @@ enum CommandEnum: string
             '/breakfast' => self::BREAKFAST,
             '/lunch' => self::LUNCH,
             '/snack' => self::SNACK,
+            '/water' => self::WATER,
             '/symptoms' => self::SYMPTOMS,
             '/sleepquality' => self::SLEEP_QUALITY,
             '/wakeupstate' => self::WAKE_UP_STATE,

@@ -114,10 +114,11 @@ class User extends Authenticatable
             QuestionsEnum::SLEEP_QUALITY->value => QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
             QuestionsEnum::WAKE_UP_STATE->value => QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
             QuestionsEnum::SYMPTOMS->value => QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
-            // notice that im checking for single value for breakfast, lunch and dinner
+            // notice that im checking for single value for breakfast, lunch, dinner and water
             QuestionsEnum::BREAKFAST->value => QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
             QuestionsEnum::LUNCH->value => QuestionsEnum::LUNCH->storedAnswer($conversationId),
             QuestionsEnum::DINNER->value => QuestionsEnum::DINNER->storedAnswer($conversationId),
+            QuestionsEnum::WATER->value => QuestionsEnum::WATER->storedAnswer($conversationId),
             // notice that im checking for array for snack
             QuestionsEnum::SNACK->value => QuestionsEnum::SNACK->storedAnswers($conversationId),
         ];
@@ -142,6 +143,7 @@ class User extends Authenticatable
             'sleep_quality' => QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
             'wake_up_state' => QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
             'symptoms' => QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
+            'water' => QuestionsEnum::WATER->storedAnswer($conversationId),
         ]);
 
         $template = <<<'EOT'

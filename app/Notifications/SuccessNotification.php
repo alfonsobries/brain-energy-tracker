@@ -37,6 +37,8 @@ class SuccessNotification extends TelegramNotification
 | ------- | ---- | ----- | ---- | --- | ----- | ----- | ----- | --------- |
 %s
 
+Water Intake: %s
+
 ```
 
 EOT;
@@ -56,12 +58,15 @@ EOT;
             );
         });
 
+        $water = $this->foodLog->water ? $this->foodLog->water->emoji().' '.$this->foodLog->water->description() : 'No log';
+
         $content = sprintf($content,
             collect($this->foodLog->sleep_quality)->map(fn ($item) => $item->emoji().' '.$item->description())->join(', '),
             collect($this->foodLog->wake_up_state)->map(fn ($item) => $item->emoji().' '.$item->description())->join(', '),
             collect($this->foodLog->symptoms)->map(fn ($item) => $item->emoji().' '.$item->description())->join(', '),
             collect($this->foodLog->mood)->map(fn ($item) => $item->emoji().' '.$item->description())->join(', '),
-            $tableItems->implode("\n")
+            $tableItems->implode("\n"),
+            $water,
         );
 
         // Escape - with \ to avoid markdown formatting

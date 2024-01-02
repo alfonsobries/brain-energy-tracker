@@ -38,6 +38,12 @@ class Ask extends Command
         $users = User::all();
 
         $users->each(function (User $user) use ($question) {
+            $notification = $question->notification();
+
+            if ($notification->alreadyAsked($user->getConversationId())) {
+                return;
+            }
+
             $user->ask($question);
         });
     }

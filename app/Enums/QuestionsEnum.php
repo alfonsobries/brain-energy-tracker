@@ -108,14 +108,14 @@ enum QuestionsEnum: string
     public function time(): string
     {
         return match ($this) {
-            self::MOOD => '21:00',
             self::SLEEP_QUALITY => '08:00',
             self::WAKE_UP_STATE => '08:00',
             self::SYMPTOMS => '14:00',
             self::BREAKFAST => '10:00',
             self::LUNCH => '16:00',
-            self::DINNER => '21:00',
+            self::MOOD => '19:00',
             self::SNACK => '20:00',
+            self::DINNER => '21:00',
         };
     }
 

@@ -9,6 +9,7 @@ use App\Jobs\GetFoodLog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -67,6 +68,8 @@ class User extends Authenticatable
     public function finishConversation(): void
     {
         $this->storePreviousAnwers();
+
+        $this->startConversation();
     }
 
     public function getConversationId(): ?string
@@ -88,24 +91,31 @@ class User extends Authenticatable
 
     public function allQuestionsAnswered(): bool
     {
+        return $this->questionsWithoutAnAnswer()->isEmpty();
+    }
+
+    public function questionsWithoutAnAnswer(): Collection
+    {
         $conversationId = $this->getConversationId();
 
         if ($conversationId === null) {
-            return true;
+            return [];
         }
 
         $answers = [
-            QuestionsEnum::MOOD->storedAnswers($conversationId),
-            QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
-            QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
-            QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
-            QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
-            QuestionsEnum::LUNCH->storedAnswer($conversationId),
-            QuestionsEnum::DINNER->storedAnswer($conversationId),
-            QuestionsEnum::SNACK->storedAnswer($conversationId),
+            QuestionsEnum::MOOD->value => QuestionsEnum::MOOD->storedAnswers($conversationId),
+            QuestionsEnum::SLEEP_QUALITY->value => QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
+            QuestionsEnum::WAKE_UP_STATE->value => QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
+            QuestionsEnum::SYMPTOMS->value => QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
+            QuestionsEnum::BREAKFAST->value => QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
+            QuestionsEnum::LUNCH->value => QuestionsEnum::LUNCH->storedAnswer($conversationId),
+            QuestionsEnum::DINNER->value => QuestionsEnum::DINNER->storedAnswer($conversationId),
+            QuestionsEnum::SNACK->value => QuestionsEnum::SNACK->storedAnswer($conversationId),
         ];
 
-        return count(array_filter($answers)) === count($answers);
+        $empty = array_filter($answers, fn ($answer) => $answer === null || (is_array($answer) && count($answer) === 0));
+
+        return collect(array_map(fn ($question) => QuestionsEnum::fromString($question), array_keys($empty)));
     }
 
     public function storePreviousAnwers(): void

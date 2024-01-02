@@ -2,6 +2,9 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Ask;
+use App\Console\Commands\FinishConversation;
+use App\Console\Commands\RememberMissingData;
 use App\Enums\QuestionsEnum;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -13,11 +16,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        collect(QuestionsEnum::cases())->each(fn (QuestionsEnum $question) => $schedule->command('telegram:ask', [
+        collect(QuestionsEnum::cases())->each(fn (QuestionsEnum $question) => $schedule->command(Ask::class, [
             'question' => $question->value,
         ])->dailyAt($question->time()));
 
-        $schedule->command('app:finish-conversation')->dailyAt('23:00');
+        $schedule->command(FinishConversation::class)->dailyAt('23:00');
+
+        $schedule->command(RememberMissingData::class)->dailyAt('07:00');
     }
 
     /**

@@ -29,8 +29,6 @@ class TelegramBotWebhookController extends Controller
 
     public function __invoke(Request $request): JsonResponse
     {
-        info($request->all());
-
         $telegramUserId = $this->getTelegramUserId($request);
 
         if ($telegramUserId === null) {

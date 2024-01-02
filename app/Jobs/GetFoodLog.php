@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Log;
 use App\Notifications\ErrorNotification;
+use App\Notifications\SuccessNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -61,6 +62,7 @@ class GetFoodLog implements ShouldQueue
                 }
             }
 
+            $user->notify(new SuccessNotification($this->log));
         } catch (\Exception $e) {
             $user->notify(new ErrorNotification('*Cannot parse api response:* '."\n\n".'Message: '.$e->getMessage()."\n\n".'Response: '.$response));
         }

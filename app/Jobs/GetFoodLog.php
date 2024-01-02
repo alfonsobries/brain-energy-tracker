@@ -3,13 +3,13 @@
 namespace App\Jobs;
 
 use App\Models\Log;
+use App\Notifications\ErrorNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log as LogFacade;
 
 class GetFoodLog implements ShouldQueue
 {
@@ -28,37 +28,41 @@ class GetFoodLog implements ShouldQueue
      */
     public function handle(): void
     {
-        $data = Http::ingredients($this->foodDescription);
-
-        LogFacade::info(is_string($data) ? 'String' : 'Not string');
+        $user = $this->log->user;
 
         try {
-            $data = json_decode($data, true);
+            $response = Http::ingredients($this->foodDescription);
+        } catch (\Exception $e) {
+            $user->notify(new ErrorNotification('Cannot get food from API: '.$e->getMessage().' '.$this->foodDescription));
 
-            LogFacade::info(is_array($data) ? 'Array' : 'Not array');
+            return;
+        }
 
-            try {
-                foreach ($data as $value) {
-                    LogFacade::info(is_array($value) ? 'Array caue' : 'Not array value');
+        if (! is_string($response)) {
+            $user->notify(new ErrorNotification('Data returned from API is not a string'));
 
-                    LogFacade::info($value);
+            return;
+        }
 
-                    if (is_array($value)) {
-                        $this->log->food()->create($value);
-                    }
+        try {
+            $data = json_decode($response, true);
+
+            if (! is_array($data)) {
+                throw new \Exception('Data parsed from the json string is not an array');
+
+                return;
+            }
+
+            foreach ($data as $value) {
+                try {
+                    $this->log->food()->create($value);
+                } catch (\Exception $e) {
+                    $user->notify(new ErrorNotification('*Cannot store:* '."\n\n".'Message: '.$e->getMessage()."\n\n".'Response: '.$response));
                 }
-
-            } catch (\Exception $e) {
-                LogFacade::info('Cannot store. Message: '.$e->getMessage());
-
-                LogFacade::info($data);
             }
 
         } catch (\Exception $e) {
-            LogFacade::info('Cannot parse. Message: '.$e->getMessage());
-
-            LogFacade::info($data);
+            $user->notify(new ErrorNotification('*Cannot parse api response:* '."\n\n".'Message: '.$e->getMessage()."\n\n".'Response: '.$response));
         }
-
     }
 }

@@ -9,6 +9,7 @@ use App\Enums\WakeUpStateEnum;
 use Illuminate\Database\Eloquent\Casts\AsEnumArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Log extends Model
@@ -27,5 +28,10 @@ class Log extends Model
     public function food(): HasMany
     {
         return $this->hasMany(LogFood::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

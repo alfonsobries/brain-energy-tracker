@@ -4,33 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\CommandEnum;
 use App\Enums\QuestionsEnum;
 use App\Models\User;
-use App\Notifications\AskUserMoodNotification;
-use App\Notifications\AskUserSleepQualityNotification;
-use App\Notifications\AskUserWakeUpStateNotification;
+use App\Notifications\NoActiveConversation;
 use App\Notifications\TelegramReadyNotification;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class TelegramBotWebhookController extends Controller
 {
-    // const SLEEP_QUALITY = 'sleep-quality';
-
-    // const WAKE_UP_STATE = 'wake-up-state';
-
-    // const MOOD = 'mood';
-
-    // const QUESTIONS = [
-    //     self::MOOD => AskUserMoodNotification::class,
-    //     self::WAKE_UP_STATE => AskUserWakeUpStateNotification::class,
-    //     self::SLEEP_QUALITY => AskUserSleepQualityNotification::class,
-    // ];
-
     private function getUser(string|int $telegramUserId): ?User
     {
         return User::where('telegram_user_id', $telegramUserId)->first();
@@ -43,6 +29,8 @@ class TelegramBotWebhookController extends Controller
 
     public function __invoke(Request $request): JsonResponse
     {
+        info($request->all());
+
         $telegramUserId = $this->getTelegramUserId($request);
 
         if ($telegramUserId === null) {
@@ -61,8 +49,16 @@ class TelegramBotWebhookController extends Controller
 
         $conversationId = $user->getConversationId();
 
+        $text = Arr::get($request->all(), 'message.text', '');
+
+        $command = CommandEnum::fromString($text);
+
+        if ($command !== null) {
+            return $this->handleCommand($user, $command);
+        }
+
         if ($conversationId === null) {
-            Log::info('No conversation ID', ['telegram_user_id' => $telegramUserId]);
+            $user->notify(new NoActiveConversation());
 
             return response()->json(['status' => 'no-conversation-id']);
         }
@@ -71,7 +67,7 @@ class TelegramBotWebhookController extends Controller
 
         $question = QuestionsEnum::fromQuestion($question);
 
-        $answerText = Arr::get($request->all(), 'callback_query.data', Arr::get($request->all(), 'message.text', ''));
+        $answerText = Arr::get($request->all(), 'callback_query.data', $text);
 
         if ($question === null) {
             $question = QuestionsEnum::lastAsked($conversationId);
@@ -89,31 +85,43 @@ class TelegramBotWebhookController extends Controller
                 answerText: $answerText
             );
 
-            $question = $question->nextQuestion();
-
-            if ($question !== null) {
-                if ($question->notAskedYet($conversationId)) {
-                    $user->ask($question);
-                }
-
-                return response()->json(['status' => 'next-question']);
-            } else {
-                $user->storeAnwers();
-            }
         } catch (\Exception $e) {
-            Log::info('Invalid answer', ['telegram_user_id' => $telegramUserId, 'question' => $question, 'answer' => $answerText, 'error' => $e->getMessage()]);
-
-            throw $e;
+            Log::info('Invalid answer', ['telegram_user_id' => $telegramUserId, 'question' => $question, 'answer' => $answerText]);
 
             return response()->json(['status' => 'invalid-answer']);
         }
 
-        return response()->json(['status' => '@todo']);
+        // $question = $question->nextQuestion();
+
+        // if ($question === null) {
+        //     return response()->json(['status' => 'no-next-question']);
+        // }
+
+        // if ($question->notification()->notAskedYet($conversationId)) {
+        //     $user->ask($question);
+        // }
+
+        // return response()->json(['status' => 'next-question']);
+
+        return response()->json(['status' => 'answer-stored']);
     }
 
-    private function haventAsked(string $key, string $conversationId): bool
+    private function handleCommand(User $user, CommandEnum $command): JsonResponse
     {
-        return Cache::missing(sprintf('%s-%s', $key, $conversationId));
+        match ($command) {
+            CommandEnum::START_SESSION => $user->startConversation(),
+            CommandEnum::BREAKFAST => $user->ask(QuestionsEnum::BREAKFAST),
+            CommandEnum::DINNER => $user->ask(QuestionsEnum::DINNER),
+            CommandEnum::LUNCH => $user->ask(QuestionsEnum::LUNCH),
+            CommandEnum::DINNER => $user->ask(QuestionsEnum::DINNER),
+            CommandEnum::SNACK => $user->ask(QuestionsEnum::SNACK),
+            CommandEnum::MOOD => $user->ask(QuestionsEnum::MOOD),
+            CommandEnum::SLEEP_QUALITY => $user->ask(QuestionsEnum::SLEEP_QUALITY),
+            CommandEnum::WAKE_UP_STATE => $user->ask(QuestionsEnum::WAKE_UP_STATE),
+            CommandEnum::SYMPTOMS => $user->ask(QuestionsEnum::SYMPTOMS),
+        };
+
+        return response()->json(['status' => 'command-handled']);
     }
 
     private function tryToAssignTelegramIdToUser(string|int $telegramUserId): JsonResponse

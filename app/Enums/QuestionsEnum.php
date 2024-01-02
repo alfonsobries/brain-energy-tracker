@@ -106,13 +106,13 @@ enum QuestionsEnum: string
         };
     }
 
-    public function nextQuestion(): ?TelegramQuestion
+    public function nextQuestion(): ?QuestionsEnum
     {
         $index = $this->index();
 
         $question = self::fromIndex($index + 1);
 
-        return $question?->notification();
+        return $question;
     }
 
     public function cacheKey(string $conversationId): string
@@ -152,11 +152,11 @@ enum QuestionsEnum: string
         return [];
     }
 
-    public function storedAnswer(string $conversationId): string
+    public function storedAnswer(string $conversationId): ?string
     {
         $cacheKey = $this->cacheKey($conversationId);
 
-        return Cache::get($cacheKey) ?? '';
+        return Cache::get($cacheKey) ?? null;
     }
 
     public function storeAnswerInCache(string $conversationId, string $answerText): void

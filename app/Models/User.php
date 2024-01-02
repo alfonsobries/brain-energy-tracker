@@ -6,8 +6,6 @@ namespace App\Models;
 
 use App\Enums\QuestionsEnum;
 use App\Jobs\GetFoodLog;
-use App\Notifications\TelegramQuestion;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -63,13 +61,11 @@ class User extends Authenticatable
 
     public function startConversation(): void
     {
-        Cache::put(
-            key: $this->conversationKey(),
-            value: uniqid(),
-            ttl: Carbon::now()->addHours(18)
-        );
+        $this->storePreviousAnwers();
 
-        $this->ask(QuestionsEnum::fromIndex(0)->notification());
+        Cache::rememberForever($this->conversationKey(), fn () => uniqid());
+
+        $this->ask(QuestionsEnum::fromIndex(0));
     }
 
     public function getConversationId(): ?string
@@ -77,9 +73,10 @@ class User extends Authenticatable
         return Cache::get($this->conversationKey());
     }
 
-    public function ask(TelegramQuestion $question): void
+    public function ask(QuestionsEnum $question): void
     {
-        $this->notifyNow($question);
+        info('Asking question', ['question' => $question->value]);
+        $this->notifyNow($question->notification());
     }
 
     public function logs()
@@ -87,9 +84,15 @@ class User extends Authenticatable
         return $this->hasMany(Log::class);
     }
 
-    public function storeAnwers(): void
+    public function storePreviousAnwers(): void
     {
         $conversationId = $this->getConversationId();
+
+        if ($conversationId === null) {
+            Cache::forget($this->conversationKey());
+
+            return;
+        }
 
         $log = $this->logs()->create([
             'mood' => QuestionsEnum::MOOD->storedAnswers($conversationId),
@@ -109,15 +112,21 @@ Snack: %s
 
 EOT;
 
-        $foodDescription = sprintf(
-            $template,
+        $foods = [
             QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
             QuestionsEnum::LUNCH->storedAnswer($conversationId),
             QuestionsEnum::DINNER->storedAnswer($conversationId),
-            QuestionsEnum::SNACK->storedAnswer($conversationId)
-        );
+            QuestionsEnum::SNACK->storedAnswer($conversationId),
+        ];
 
-        GetFoodLog::dispatch($log, $foodDescription);
+        if (count(array_filter($foods)) > 0) {
+            $foodDescription = sprintf(
+                $template,
+                ...$foods
+            );
+
+            GetFoodLog::dispatch($log, $foodDescription);
+        }
 
         Cache::forget($this->conversationKey());
     }

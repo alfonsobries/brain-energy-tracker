@@ -6,30 +6,15 @@ namespace App\Notifications;
 
 use App\Enums\QuestionsEnum;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
 use NotificationChannels\Telegram\TelegramBase;
 use NotificationChannels\Telegram\TelegramMessage;
 
-abstract class TelegramQuestion extends Notification implements ShouldQueue
+abstract class TelegramQuestion extends TelegramNotification
 {
-    use Queueable;
-
     abstract public static function question(): string;
 
     abstract public static function name(): QuestionsEnum;
-
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(User $notifiable): array
-    {
-        return ['telegram'];
-    }
 
     private function questionCacheKey($conversationId): string
     {

@@ -26,7 +26,9 @@ enum CommandEnum: string
 
     case RESTART_SESSION = 'restart';
 
-    case GET_MISSING = 'missing';
+    case MISSING = 'missing';
+
+    case ANSWERED = 'answered';
 
     public function description(): string
     {
@@ -42,7 +44,8 @@ enum CommandEnum: string
             self::MOOD => 'Register your day mood',
             self::RESTART_SESSION => 'Restart prompt session without storing answers',
             self::FINISH_SESSION => 'Finish prompt session and store answers',
-            self::GET_MISSING => 'Get missing answers',
+            self::MISSING => 'Get missing answers',
+            self::ANSWERED => 'Get answered questions',
         };
     }
 
@@ -50,7 +53,8 @@ enum CommandEnum: string
     {
         return match ($command) {
             '/restart' => self::RESTART_SESSION,
-            '/missing' => self::GET_MISSING,
+            '/missing' => self::MISSING,
+            '/answered' => self::ANSWERED,
             '/finish' => self::FINISH_SESSION,
             '/dinner' => self::DINNER,
             '/breakfast' => self::BREAKFAST,

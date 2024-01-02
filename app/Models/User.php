@@ -128,6 +128,33 @@ class User extends Authenticatable
         return collect(array_map(fn ($question) => QuestionsEnum::fromString($question), array_keys($empty)));
     }
 
+    public function questionsWithAnswer(): Collection
+    {
+        $conversationId = $this->getConversationId();
+
+        if ($conversationId === null) {
+            return [];
+        }
+
+        $answers = [
+            QuestionsEnum::MOOD->value => QuestionsEnum::MOOD->storedAnswers($conversationId),
+            QuestionsEnum::SLEEP_QUALITY->value => QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
+            QuestionsEnum::WAKE_UP_STATE->value => QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
+            QuestionsEnum::SYMPTOMS->value => QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
+            // notice that im checking for single value for breakfast, lunch, dinner and water
+            QuestionsEnum::BREAKFAST->value => QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
+            QuestionsEnum::LUNCH->value => QuestionsEnum::LUNCH->storedAnswer($conversationId),
+            QuestionsEnum::DINNER->value => QuestionsEnum::DINNER->storedAnswer($conversationId),
+            QuestionsEnum::WATER->value => QuestionsEnum::WATER->storedAnswer($conversationId),
+            // notice that im checking for array for snack
+            QuestionsEnum::SNACK->value => QuestionsEnum::SNACK->storedAnswers($conversationId),
+        ];
+
+        $notEmpty = array_filter($answers, fn ($answer) => is_string($answer) || (is_array($answer) && count($answer) > 0));
+
+        return collect($notEmpty);
+    }
+
     public function storePreviousAnwers(): void
     {
         $conversationId = $this->getConversationId();

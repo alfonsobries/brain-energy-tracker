@@ -98,6 +98,22 @@ enum QuestionsEnum: string
         };
     }
 
+    public function name(): string
+    {
+        return match ($this) {
+            self::MOOD => 'Mood',
+            self::SLEEP_QUALITY => 'Sleep Quality',
+            self::WAKE_UP_STATE => 'Wake Up State',
+            self::SYMPTOMS => 'Symptoms',
+            self::BREAKFAST => 'Breakfast',
+            self::LUNCH => 'Lunch',
+            self::DINNER => 'Dinner',
+            self::SNACK => 'Snack',
+            self::WATER => 'Water',
+        };
+
+    }
+
     public function notification(): TelegramQuestion
     {
         return match ($this) {

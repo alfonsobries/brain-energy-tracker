@@ -8,6 +8,7 @@ use App\Enums\CommandEnum;
 use App\Enums\QuestionsEnum;
 use App\Models\User;
 use App\Notifications\AllQuestionsAnswered;
+use App\Notifications\CurrentAnswers;
 use App\Notifications\MissingAnswers;
 use App\Notifications\NoActiveConversation;
 use App\Notifications\TelegramReadyNotification;
@@ -113,7 +114,8 @@ class TelegramBotWebhookController extends Controller
     private function handleCommand(User $user, CommandEnum $command): JsonResponse
     {
         match ($command) {
-            CommandEnum::GET_MISSING => $user->notify(new MissingAnswers()),
+            CommandEnum::MISSING => $user->notify(new MissingAnswers()),
+            CommandEnum::ANSWERED => $user->notify(new CurrentAnswers()),
             CommandEnum::RESTART_SESSION => $user->restartConversation(),
             CommandEnum::FINISH_SESSION => $user->finishConversation(),
             CommandEnum::BREAKFAST => $user->ask(QuestionsEnum::BREAKFAST),

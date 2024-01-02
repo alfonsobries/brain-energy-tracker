@@ -61,11 +61,12 @@ class User extends Authenticatable
 
     public function startConversation(): void
     {
-        $this->storePreviousAnwers();
-
         Cache::rememberForever($this->conversationKey(), fn () => uniqid());
+    }
 
-        $this->ask(QuestionsEnum::fromIndex(0));
+    public function finishConversation(): void
+    {
+        $this->storePreviousAnwers();
     }
 
     public function getConversationId(): ?string
@@ -75,13 +76,36 @@ class User extends Authenticatable
 
     public function ask(QuestionsEnum $question): void
     {
-        info('Asking question', ['question' => $question->value]);
+        Cache::put('last-question-asked.'.$this->getConversationId(), $question->value, now()->addHours(24));
+
         $this->notifyNow($question->notification());
     }
 
     public function logs()
     {
         return $this->hasMany(Log::class);
+    }
+
+    public function allQuestionsAnswered(): bool
+    {
+        $conversationId = $this->getConversationId();
+
+        if ($conversationId === null) {
+            return true;
+        }
+
+        $answers = [
+            QuestionsEnum::MOOD->storedAnswers($conversationId),
+            QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
+            QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
+            QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
+            QuestionsEnum::BREAKFAST->storedAnswer($conversationId),
+            QuestionsEnum::LUNCH->storedAnswer($conversationId),
+            QuestionsEnum::DINNER->storedAnswer($conversationId),
+            QuestionsEnum::SNACK->storedAnswer($conversationId),
+        ];
+
+        return count(array_filter($answers)) === count($answers);
     }
 
     public function storePreviousAnwers(): void

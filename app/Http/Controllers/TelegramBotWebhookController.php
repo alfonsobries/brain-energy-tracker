@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Enums\CommandEnum;
 use App\Enums\QuestionsEnum;
 use App\Models\User;
+use App\Notifications\AllQuestionsAnswered;
 use App\Notifications\NoActiveConversation;
 use App\Notifications\TelegramReadyNotification;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -83,6 +84,10 @@ class TelegramBotWebhookController extends Controller
                 answerText: $answerText
             );
 
+            if ($user->allQuestionsAnswered()) {
+                $user->notify(new AllQuestionsAnswered());
+
+            }
         } catch (\Exception $e) {
             Log::info('Invalid answer', ['telegram_user_id' => $telegramUserId, 'question' => $question, 'answer' => $answerText]);
 
@@ -108,6 +113,7 @@ class TelegramBotWebhookController extends Controller
     {
         match ($command) {
             CommandEnum::START_SESSION => $user->startConversation(),
+            CommandEnum::FINISH_SESSION => $user->finishConversation(),
             CommandEnum::BREAKFAST => $user->ask(QuestionsEnum::BREAKFAST),
             CommandEnum::DINNER => $user->ask(QuestionsEnum::DINNER),
             CommandEnum::LUNCH => $user->ask(QuestionsEnum::LUNCH),

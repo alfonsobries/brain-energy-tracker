@@ -16,6 +16,8 @@ class Kernel extends ConsoleKernel
         collect(QuestionsEnum::cases())->each(fn (QuestionsEnum $question) => $schedule->command('telegram:ask', [
             'question' => $question->value,
         ])->dailyAt($question->time()));
+
+        $schedule->command('app:finish-conversation')->dailyAt('23:00');
     }
 
     /**

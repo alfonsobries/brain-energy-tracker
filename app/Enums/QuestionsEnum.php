@@ -151,21 +151,13 @@ enum QuestionsEnum: string
 
     public static function lastAsked(string $conversationId): ?QuestionsEnum
     {
-        $total = count(self::cases());
+        $question = Cache::get('last-question-asked.'.$conversationId);
 
-        for ($index = $total; $index >= 0; $index--) {
-            /**
-             * @var \App\Enums\QuestionsEnum $question
-             */
-            $question = self::fromIndex($index);
-
-            if ($question?->notification()->alreadyAsked($conversationId)) {
-                return $question;
-            }
+        if ($question === null) {
+            return null;
         }
 
-        return null;
-
+        return self::fromString($question);
     }
 
     public function storedAnswers(string $conversationId): array

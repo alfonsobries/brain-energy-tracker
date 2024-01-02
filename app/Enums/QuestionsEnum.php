@@ -76,6 +76,21 @@ enum QuestionsEnum: string
         };
     }
 
+    public static function fromString(string $question): ?QuestionsEnum
+    {
+        return match ($question) {
+            'mood' => self::MOOD,
+            'sleep-quality' => self::SLEEP_QUALITY,
+            'wake-up-state' => self::WAKE_UP_STATE,
+            'symptoms' => self::SYMPTOMS,
+            'breakfast' => self::BREAKFAST,
+            'lunch' => self::LUNCH,
+            'dinner' => self::DINNER,
+            'snack' => self::SNACK,
+            default => null,
+        };
+    }
+
     public function notification(): TelegramQuestion
     {
         return match ($this) {
@@ -87,6 +102,20 @@ enum QuestionsEnum: string
             self::LUNCH => new AskLunch(),
             self::DINNER => new AskDinner(),
             self::SNACK => new AskSnack(),
+        };
+    }
+
+    public function time(): string
+    {
+        return match ($this) {
+            self::MOOD => '21:00',
+            self::SLEEP_QUALITY => '08:00',
+            self::WAKE_UP_STATE => '08:00',
+            self::SYMPTOMS => '14:00',
+            self::BREAKFAST => '10:00',
+            self::LUNCH => '16:00',
+            self::DINNER => '21:00',
+            self::SNACK => '20:00',
         };
     }
 

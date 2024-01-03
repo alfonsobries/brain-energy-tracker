@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\QuestionsEnum;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class Ask extends Command
 {
@@ -30,6 +31,10 @@ class Ask extends Command
         $question = QuestionsEnum::fromString($this->argument('question'));
 
         if ($question === null) {
+            Log::info('Question not found', [
+                'question' => $this->argument('question'),
+            ]);
+
             $this->error('Question not found');
 
             return;

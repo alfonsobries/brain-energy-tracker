@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         collect(QuestionsEnum::cases())->each(fn (QuestionsEnum $question) => $schedule->command(Ask::class, [
-            'question' => $question->value,
+            $question->value,
         ])->dailyAt($question->time()));
 
         $schedule->command(FinishConversation::class)->dailyAt('23:00');

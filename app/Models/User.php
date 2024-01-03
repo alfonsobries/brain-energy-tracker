@@ -168,13 +168,15 @@ class User extends Authenticatable
             return;
         }
 
+        $sugar = QuestionsEnum::SUGAR->storedAnswer($conversationId);
+
         $log = $this->logs()->create([
             'mood' => QuestionsEnum::MOOD->storedAnswers($conversationId),
             'sleep_quality' => QuestionsEnum::SLEEP_QUALITY->storedAnswers($conversationId),
             'wake_up_state' => QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
             'symptoms' => QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
             'water' => QuestionsEnum::WATER->storedAnswer($conversationId),
-            'sugar' => (int) QuestionsEnum::SUGAR->storedAnswer($conversationId),
+            'sugar' => $sugar === null ? null : (int) $sugar,
         ]);
 
         $template = <<<'EOT'

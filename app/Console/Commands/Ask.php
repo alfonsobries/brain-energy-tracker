@@ -46,6 +46,10 @@ class Ask extends Command
             $notification = $question->notification();
 
             if ($notification->alreadyAsked($user->getConversationId())) {
+                Log::info('Already asked', [
+                    'question' => $this->argument('question'),
+                ]);
+
                 return;
             }
 

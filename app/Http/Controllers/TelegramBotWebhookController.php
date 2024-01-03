@@ -128,6 +128,7 @@ class TelegramBotWebhookController extends Controller
             CommandEnum::SLEEP_QUALITY => $user->ask(QuestionsEnum::SLEEP_QUALITY),
             CommandEnum::WAKE_UP_STATE => $user->ask(QuestionsEnum::WAKE_UP_STATE),
             CommandEnum::SYMPTOMS => $user->ask(QuestionsEnum::SYMPTOMS),
+            CommandEnum::SUGAR => $user->ask(QuestionsEnum::SUGAR),
         };
 
         return response()->json(['status' => 'command-handled']);

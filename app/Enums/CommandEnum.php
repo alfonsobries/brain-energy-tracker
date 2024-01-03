@@ -30,6 +30,8 @@ enum CommandEnum: string
 
     case ANSWERED = 'answered';
 
+    case SUGAR = 'sugar';
+
     public function description(): string
     {
         return match ($this) {
@@ -46,6 +48,7 @@ enum CommandEnum: string
             self::FINISH_SESSION => 'Finish prompt session and store answers',
             self::MISSING => 'Get missing answers',
             self::ANSWERED => 'Get answered questions',
+            self::SUGAR => 'Register your blood sugar level (mg/dL)',
         };
     }
 
@@ -65,6 +68,7 @@ enum CommandEnum: string
             '/sleepquality' => self::SLEEP_QUALITY,
             '/wakeupstate' => self::WAKE_UP_STATE,
             '/mood' => self::MOOD,
+            '/sugar' => self::SUGAR,
             default => null,
         };
     }

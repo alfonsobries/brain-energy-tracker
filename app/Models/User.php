@@ -121,6 +121,8 @@ class User extends Authenticatable
             QuestionsEnum::WATER->value => QuestionsEnum::WATER->storedAnswer($conversationId),
             // notice that im checking for array for snack
             QuestionsEnum::SNACK->value => QuestionsEnum::SNACK->storedAnswers($conversationId),
+            // Sugar is optional so we dont need to check for it
+            // QuestionsEnum::SUGAR->value => QuestionsEnum::SUGAR->storedAnswer($conversationId),
         ];
 
         $empty = array_filter($answers, fn ($answer) => $answer === null || (is_array($answer) && count($answer) === 0));
@@ -148,6 +150,7 @@ class User extends Authenticatable
             QuestionsEnum::WATER->value => QuestionsEnum::WATER->storedAnswer($conversationId),
             // notice that im checking for array for snack
             QuestionsEnum::SNACK->value => QuestionsEnum::SNACK->storedAnswers($conversationId),
+            QuestionsEnum::SUGAR->value => QuestionsEnum::SUGAR->storedAnswer($conversationId),
         ];
 
         $notEmpty = array_filter($answers, fn ($answer) => is_string($answer) || (is_array($answer) && count($answer) > 0));
@@ -171,6 +174,7 @@ class User extends Authenticatable
             'wake_up_state' => QuestionsEnum::WAKE_UP_STATE->storedAnswers($conversationId),
             'symptoms' => QuestionsEnum::SYMPTOMS->storedAnswers($conversationId),
             'water' => QuestionsEnum::WATER->storedAnswer($conversationId),
+            'sugar' => (int) QuestionsEnum::SUGAR->storedAnswer($conversationId),
         ]);
 
         $template = <<<'EOT'

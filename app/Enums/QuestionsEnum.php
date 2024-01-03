@@ -6,6 +6,7 @@ use App\Notifications\AskBreakfast;
 use App\Notifications\AskDinner;
 use App\Notifications\AskLunch;
 use App\Notifications\AskSnack;
+use App\Notifications\AskSugar;
 use App\Notifications\AskSymptomsNotification;
 use App\Notifications\AskUserMoodNotification;
 use App\Notifications\AskUserSleepQualityNotification;
@@ -35,18 +36,21 @@ enum QuestionsEnum: string
 
     case WATER = 'water';
 
+    case SUGAR = 'sugar';
+
     public function index(): int
     {
         return match ($this) {
             self::SLEEP_QUALITY => 0,
             self::WAKE_UP_STATE => 1,
-            self::MOOD => 2,
-            self::SYMPTOMS => 3,
-            self::BREAKFAST => 4,
-            self::LUNCH => 5,
-            self::DINNER => 6,
-            self::SNACK => 7,
-            self::WATER => 8,
+            self::SUGAR => 2,
+            self::MOOD => 3,
+            self::SYMPTOMS => 4,
+            self::BREAKFAST => 5,
+            self::LUNCH => 6,
+            self::DINNER => 7,
+            self::SNACK => 8,
+            self::WATER => 9,
         };
     }
 
@@ -55,13 +59,14 @@ enum QuestionsEnum: string
         return match ($index) {
             0 => self::SLEEP_QUALITY,
             1 => self::WAKE_UP_STATE,
-            2 => self::MOOD,
-            3 => self::SYMPTOMS,
-            4 => self::BREAKFAST,
-            5 => self::LUNCH,
-            6 => self::DINNER,
-            7 => self::SNACK,
-            8 => self::WATER,
+            2 => self::SUGAR,
+            3 => self::MOOD,
+            4 => self::SYMPTOMS,
+            5 => self::BREAKFAST,
+            6 => self::LUNCH,
+            7 => self::DINNER,
+            8 => self::SNACK,
+            9 => self::WATER,
             default => null,
         };
     }
@@ -78,6 +83,7 @@ enum QuestionsEnum: string
             AskDinner::question() => self::DINNER,
             AskSnack::question() => self::SNACK,
             AskWater::question() => self::WATER,
+            AskSugar::question() => self::SUGAR,
             default => null,
         };
     }
@@ -94,6 +100,7 @@ enum QuestionsEnum: string
             'dinner' => self::DINNER,
             'snack' => self::SNACK,
             'water' => self::WATER,
+            'sugar' => self::SUGAR,
             default => null,
         };
     }
@@ -110,6 +117,7 @@ enum QuestionsEnum: string
             self::DINNER => 'Dinner',
             self::SNACK => 'Snack',
             self::WATER => 'Water',
+            self::SUGAR => 'Sugar',
         };
 
     }
@@ -126,14 +134,16 @@ enum QuestionsEnum: string
             self::DINNER => new AskDinner(),
             self::SNACK => new AskSnack(),
             self::WATER => new AskWater(),
+            self::SUGAR => new AskSugar(),
         };
     }
 
     public function time(): string
     {
         return match ($this) {
-            self::SLEEP_QUALITY => '08:00',
-            self::WAKE_UP_STATE => '08:00',
+            self::SLEEP_QUALITY => '07:00',
+            self::WAKE_UP_STATE => '07:00',
+            self::SUGAR => '07:30',
             self::SYMPTOMS => '14:00',
             self::BREAKFAST => '10:00',
             self::LUNCH => '16:00',

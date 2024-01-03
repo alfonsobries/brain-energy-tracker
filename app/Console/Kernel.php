@@ -23,6 +23,7 @@ class Kernel extends ConsoleKernel
         $schedule->command(FinishConversation::class)->dailyAt('23:00');
 
         $schedule->command(RememberMissingData::class)->dailyAt('07:00');
+        $schedule->command(RememberMissingData::class)->dailyAt('11:12');
     }
 
     /**

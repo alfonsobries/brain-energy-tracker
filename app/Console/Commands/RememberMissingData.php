@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\User;
 use App\Notifications\MissingAnswers;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class RememberMissingData extends Command
 {
@@ -27,6 +28,8 @@ class RememberMissingData extends Command
      */
     public function handle()
     {
+        Log::info('Remembering missing data');
+
         $users = User::all();
 
         $users

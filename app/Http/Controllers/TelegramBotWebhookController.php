@@ -40,17 +40,17 @@ class TelegramBotWebhookController extends Controller
             return response()->json(['status' => 'no-telegram-user-id']);
         }
 
+        $text = Arr::get($request->all(), 'message.text', '');
+
         $user = $this->getUser($telegramUserId);
 
         if ($user === null) {
             Log::info('User not found', ['telegram_user_id' => $telegramUserId]);
 
-            return $this->tryToAssignTelegramIdToUser($telegramUserId);
+            return $this->tryToAssignTelegramIdToUser($text, $telegramUserId);
         }
 
         $conversationId = $user->getConversationId();
-
-        $text = Arr::get($request->all(), 'message.text', '');
 
         $command = CommandEnum::fromString($text);
 
@@ -134,9 +134,9 @@ class TelegramBotWebhookController extends Controller
         return response()->json(['status' => 'command-handled']);
     }
 
-    private function tryToAssignTelegramIdToUser(string|int $telegramUserId): JsonResponse
+    private function tryToAssignTelegramIdToUser(string $text, string|int $telegramUserId): JsonResponse
     {
-        $code = trim(Arr::get(explode('/start', $message ?? ''), 1, ''));
+        $code = trim(Arr::get(explode('/start', $text), 1, ''));
 
         if (strlen($code) === 0) {
             return response()->json(['status' => 'no-code']);
